@@ -133,7 +133,35 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
+      <div className="md:hidden space-y-3">
+        {products.map(p => (
+          <article key={p.id} className="bg-white shadow rounded-lg p-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <img className="h-12 w-12 rounded-full object-cover shrink-0" src={p.imageUrl} alt="" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-gray-900 break-words">{p.name}</div>
+                <div className="text-sm text-gray-500 break-words">{p.category}</div>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span className="text-sm text-gray-900">${p.price.toFixed(2)}</span>
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.stock > 10 ? 'bg-green-100 text-green-800' : p.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                    {p.stock} in stock
+                  </span>
+                </div>
+                <div className="mt-3 flex gap-4 text-sm font-medium">
+                  <button onClick={() => handleEdit(p)} className="min-h-11 text-gold-dark hover:text-gold">
+                    <Edit2 className="w-4 h-4 inline" /> Edit
+                  </button>
+                  <button onClick={() => handleDelete(p.id)} className="min-h-11 text-red-500 hover:text-red-700">
+                    <Trash2 className="w-4 h-4 inline" /> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden md:block bg-white shadow overflow-x-auto sm:rounded-lg">
           <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
