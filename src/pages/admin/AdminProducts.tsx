@@ -126,50 +126,52 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h1 className="text-3xl font-serif text-charcoal">Products</h1>
         <button onClick={startNew} className="flex items-center px-4 py-2 bg-charcoal text-white tracking-widest text-sm font-semibold rounded hover:bg-charcoal-light">
           <Plus className="w-4 h-4 mr-2" /> Add Product
         </button>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
+          <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                <th className="px-3 py-3 sm:px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map(p => (
                 <tr key={p.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
+                  <td className="px-3 py-4 sm:px-6 align-top">
+                    <div className="flex items-center min-w-0">
                       <div className="h-10 w-10 flex-shrink-0">
                         <img className="h-10 w-10 rounded-full object-cover" src={p.imageUrl} alt="" />
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{p.name}</div>
-                        <div className="text-sm text-gray-500">{p.category}</div>
+                      <div className="ml-4 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 break-words">{p.name}</div>
+                        <div className="text-sm text-gray-500 break-words">{p.category}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${p.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-4 sm:px-6 text-sm text-gray-900 align-top">${p.price.toFixed(2)}</td>
+                  <td className="px-3 py-4 sm:px-6 align-top">
           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.stock > 10 ? 'bg-green-100 text-green-800' : p.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                       {p.stock}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => handleEdit(p)} className="text-gold-dark hover:text-gold mr-4">
-                      <Edit2 className="w-4 h-4 inline" /> Edit
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700">
-                      <Trash2 className="w-4 h-4 inline" /> Delete
-                    </button>
+                  <td className="px-3 py-4 sm:px-6 text-right text-sm font-medium align-top">
+                    <div className="flex flex-wrap justify-end gap-x-4 gap-y-2">
+                      <button onClick={() => handleEdit(p)} className="text-gold-dark hover:text-gold">
+                        <Edit2 className="w-4 h-4 inline" /> Edit
+                      </button>
+                      <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700">
+                        <Trash2 className="w-4 h-4 inline" /> Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

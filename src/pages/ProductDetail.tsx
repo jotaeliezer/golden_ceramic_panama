@@ -57,21 +57,26 @@ export default function ProductDetail() {
         </p>
         
         <div className="flex items-center space-x-4 mb-10">
-          <div className="flex items-center border border-charcoal w-32 border-opacity-20">
-            <button 
+          <div className="flex items-center border border-charcoal/20">
+            <button
+              type="button"
+              aria-label="Decrease quantity"
               onClick={() => setQty(Math.max(1, qty - 1))}
-              className="w-10 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors"
+              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >-</button>
             <input 
               type="number" 
               value={qty}
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="flex-1 text-center w-full appearance-none outline-none font-medium bg-transparent text-sm"
+              className="w-10 text-center appearance-none outline-none font-medium bg-transparent text-sm"
               readOnly
+              aria-label="Quantity"
             />
-            <button 
+            <button
+              type="button"
+              aria-label="Increase quantity"
               onClick={() => setQty(qty + 1)}
-              className="w-10 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors"
+              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >+</button>
           </div>
           
