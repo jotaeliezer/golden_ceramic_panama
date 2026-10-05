@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Golden Ceramic Panama
 
-# Run and deploy your AI Studio app
+E-commerce site for Golden Ceramic Panama ceramic molds.
 
-This contains everything you need to run your app locally.
+## Run locally
 
-View your app in AI Studio: https://ai.studio/apps/67e0634c-4fb8-46ac-b616-25ece8c42872
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Copy the example env file:
+   `cp .env.example .env`
+3. Set `JWT_SECRET` in `.env` to a long random string. This is required. On startup the server loads `.env` with dotenv and exits if `JWT_SECRET` is missing or empty.
+4. Start the dev server:
    `npm run dev`
+
+`npm run dev` does not set `NODE_ENV=production`, so the server uses the Vite dev middleware. It listens on `PORT`, or `3000` when `PORT` is unset.
+
+Optional variables in `.env`:
+
+- `APP_URL` — public base URL used for checkout return links (defaults to `http://localhost:3000`)
+- `STRIPE_SECRET_KEY` — Stripe secret key used at checkout
+
+## Production
+
+Build the client, then start the server. `npm start` sets `NODE_ENV=production` (via `cross-env`) so Express serves the static files in `dist` instead of the Vite dev middleware.
+
+1. `npm run build`
+2. `npm start`
+
+Set `JWT_SECRET` (and `PORT` if you do not want `3000`) in the environment or in `.env` before starting. `npm run dev` is unchanged.
