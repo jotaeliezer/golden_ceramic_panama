@@ -229,13 +229,22 @@ export default function AdminCapture() {
 
   return (
     <div className="mx-auto w-full max-w-md">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">Temporary · local only</p>
-      <h1 className="mt-2 font-serif text-3xl text-charcoal">Capture a mold</h1>
-      <p className="mt-3 text-sm leading-relaxed text-charcoal-light">
-        Take a photo of a ceramic or plaster mold and record how many you have. The photo and quantity are saved on
-        this server until the Supabase migration. Nothing is sent to the cloud.
-      </p>
-      <ol className="mt-5 flex gap-2" aria-label="Capture steps">
+      {step === "camera" ? (
+        <>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">Temporary · local only</p>
+          <h1 className="mt-2 font-serif text-3xl text-charcoal">Capture a mold</h1>
+          <p className="mt-3 text-sm leading-relaxed text-charcoal-light">
+            Take a photo of a ceramic or plaster mold and record how many you have. The photo and quantity are saved
+            on this server until the Supabase migration. Nothing is sent to the cloud.
+          </p>
+        </>
+      ) : (
+        <div className="flex items-baseline justify-between gap-3">
+          <h1 className="font-serif text-2xl text-charcoal">Capture a mold</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">Local only</p>
+        </div>
+      )}
+      <ol className={`flex gap-2 ${step === "camera" ? "mt-5" : "mt-4"}`} aria-label="Capture steps">
         {STEPS.map((item, index) => (
           <li
             key={item.id}
@@ -258,7 +267,7 @@ export default function AdminCapture() {
       {step === "camera" && (
         <div className="mt-5 rounded-lg bg-white p-4 shadow">
           <div
-            className={`relative aspect-[3/4] overflow-hidden rounded bg-ivory-focus ${
+            className={`relative h-[38vh] min-h-52 w-full overflow-hidden rounded bg-ivory-focus ${
               liveReady ? "" : "border border-dashed border-charcoal/20"
             }`}
           >
@@ -316,7 +325,7 @@ export default function AdminCapture() {
 
       {step === "preview" && (
         <div className="mt-5 rounded-lg bg-white p-4 shadow">
-          <img src={photo} alt="Preview of the captured mold" className="aspect-[3/4] w-full rounded object-cover" />
+          <img src={photo} alt="Preview of the captured mold" className="h-[46vh] min-h-52 w-full rounded object-cover" />
           <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -351,7 +360,7 @@ export default function AdminCapture() {
             </button>
           </div>
 
-          <h2 id="quantity-question" className="mt-5 font-serif text-2xl leading-snug text-charcoal">
+          <h2 id="quantity-question" className="mt-4 font-serif text-2xl leading-snug text-charcoal">
             How many of this piece do you have?
           </h2>
           <div className="mt-4 flex items-center gap-3">
@@ -412,7 +421,7 @@ export default function AdminCapture() {
           <img
             src={saved.imageUrl}
             alt={saved.name}
-            className="mx-auto mt-5 aspect-[3/4] w-full max-w-xs rounded object-cover"
+            className="mx-auto mt-5 h-[36vh] min-h-40 w-full max-w-xs rounded object-cover"
           />
           <p className="mt-4 text-base font-medium text-charcoal">{saved.name}</p>
           <p className="mt-1 text-sm text-gray-600">{saved.stock} in stock</p>

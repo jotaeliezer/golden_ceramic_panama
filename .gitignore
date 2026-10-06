@@ -9,3 +9,6 @@ coverage/
 
 # Local mold photos from admin capture. Temporary until the Supabase migration.
 uploads/
+
+# Local catalog database created by the dev server.
+sqlite.db*
