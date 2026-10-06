@@ -24,7 +24,7 @@ export default function Cart() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
         <div className="lg:col-span-8 space-y-8">
           {items.map((item) => (
-            <div key={item.id} className="flex gap-8 border-b border-charcoal/10 pb-8 items-center">
+            <div key={item.id} className="flex gap-4 sm:gap-8 border-b border-charcoal/10 pb-8 items-center">
               <div className="w-32 h-32 bg-ivory-focus flex-shrink-0">
                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
               </div>
@@ -38,10 +38,24 @@ export default function Cart() {
                 </div>
                 
                 <div className="flex items-center justify-between mt-6">
-                  <div className="flex items-center border border-charcoal/20 w-24">
-                    <button onClick={() => updateQuantity(item.id, item.cartQuantity - 1)} className="w-8 h-8 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-xs">-</button>
-                    <span className="flex-1 text-center text-[11px] select-none font-medium text-charcoal">{item.cartQuantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.cartQuantity + 1)} className="w-8 h-8 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-xs">+</button>
+                  <div className="flex items-center border border-charcoal/20">
+                    <button
+                      type="button"
+                      aria-label={`Decrease quantity of ${item.name}`}
+                      onClick={() => updateQuantity(item.id, item.cartQuantity - 1)}
+                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center text-[11px] select-none font-medium text-charcoal">{item.cartQuantity}</span>
+                    <button
+                      type="button"
+                      aria-label={`Increase quantity of ${item.name}`}
+                      onClick={() => updateQuantity(item.id, item.cartQuantity + 1)}
+                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                    >
+                      +
+                    </button>
                   </div>
                   <button onClick={() => removeFromCart(item.id)} className="text-charcoal/40 hover:text-charcoal transition-colors">
                     <Trash2 className="w-4 h-4" />
