@@ -308,3 +308,146 @@ Total for a first time through Vercel and Supabase: **about 3–4 days**. With p
 ## What not to do in the documentation pull request
 
 The pull request that adds this file should not change application code, should not add a database file, and should not contain keys. Implementation belongs in follow-up pull requests after you have read this.
+
+## Future feature: Physical gallery with QR ordering
+
+This section is a plan only. It sits at the end of the file so it can land beside the proposed schema section without editing that section. Merging it adds these words and leaves the site, the database, and Stripe as they are.
+
+When you rent a gallery space, leave the real ceramic and plaster molds at home. A mold is easy to steal and hard to replace. On the wall, show a high-quality printed photo of each finished piece. Each photo is a card. The card has a QR code. A visitor scans it with their phone and orders that piece on the site: how many, a color if the piece comes in colors, or the choice to paint it themselves.
+
+The shop you have today already has a product page at `/product/:id`. The gallery flow is a shorter, phone-sized order page for one piece. Build it after the move to Vercel and Supabase.
+
+### How a card works
+
+One product, one QR code. The code is a link to your public site, for example:
+
+`https://YOUR-SITE/gallery/<product-id>?src=gallery&loc=casco-viejo`
+
+Use the product id in the path. Ids stay put when you rename a piece, so a card printed this month still opens the right page next year. A readable slug such as `/p/bird-bowl?src=gallery` is fine as a second address, and the slug can redirect to `/gallery/<product-id>`. Once a card is on a wall, keep the old address working.
+
+`src=gallery` marks the visit as a gallery scan. `loc=` is the room or event name (see Gallery operations).
+
+An admin screen, **Print gallery card**, builds the card in the browser:
+
+- The photo (`gallery_card_image_url`, or the normal product photo if that field is empty)
+- The name and the price
+- The life-size **height, length, and width** of the real piece, in centimeters, with inches beside them
+- The QR code
+
+A small client-side QR library (for example the `qrcode` package) draws the code from that public URL. The page never needs a secret key to do this. The admin can use the browser’s Print dialog and choose **Save as PDF**, and can also download a PNG of the same card for a print shop.
+
+The QR encodes the full `https://` URL, including the site name from `APP_URL`. A code that only contains `/gallery/…` fails when a phone camera opens it outside the site.
+
+Checklist for a card:
+
+- [ ] One code per product, pointing at a stable `/gallery/<product-id>` URL.
+- [ ] Photo, name, and price are on the card.
+- [ ] Height, length, and width of the real piece are on the card, in cm and in inches.
+- [ ] The measurements are the finished piece, not the paper card and not the photo.
+- [ ] PDF and PNG come from the admin print view.
+- [ ] Reprinting for a new event can change `loc=` without changing the product path.
+
+### What the phone page asks
+
+The gallery link opens a mobile page for that one product. The normal product page (`/product/:id`) should show the same size line, so the catalog and the card agree. The QR page shows it again, under the name, before the form.
+
+Then the visitor:
+
+1. Chooses a quantity.
+2. Picks a color, when that product has a list of colors. Skip this step when the list is empty.
+3. Optionally checks **Paint it yourself** (unpainted / bisque). Show that price when it differs from the finished price. Hide the checkbox when the product does not offer it.
+4. Enters contact details (name, email, phone). Save them with the proposed `customers` row when the email already exists, or create that row when it does not.
+5. Continues to Stripe Checkout and pays there.
+
+The page is one product. It does not need the full cart. After payment, Stripe sends the visitor back to a short thank-you page on your site.
+
+### Columns to add later
+
+These are sketches for a later migration. Do not run them in the pull request that adds this section. They assume the **proposed** tables already exist (`products`, `purchase_requests`, `purchase_request_items` if you split lines out, `inventory`, `orders`, `customers`, `admin_users`). If a column is already on that proposed table, skip the duplicate.
+
+Sizes are stored in centimeters. `dimension_unit` records that, and the default is `cm`. Inches on the card and on the pages are calculated (`cm / 2.54`, one decimal). Storing inches as well would let the two numbers drift apart.
+
+```sql
+alter table public.products
+  add column slug text unique,
+  add column gallery_card_image_url text,
+  add column available_colors text[],
+  add column paint_yourself_available boolean not null default false,
+  add column paint_yourself_price_cents integer
+    check (paint_yourself_price_cents is null or paint_yourself_price_cents >= 0),
+  add column height_cm numeric(6, 1)
+    check (height_cm is null or height_cm > 0),
+  add column length_cm numeric(6, 1)
+    check (length_cm is null or length_cm > 0),
+  add column width_cm numeric(6, 1)
+    check (width_cm is null or width_cm > 0),
+  add column dimension_unit text not null default 'cm'
+    check (dimension_unit = 'cm');
+```
+
+The shop today stores product prices in dollars. `paint_yourself_price_cents` is integer cents so Stripe can use it directly. The code change should convert the normal price to cents the same way when it builds the Checkout Session.
+
+On the proposed admin product form, collect height, length, and width in centimeters when you add or edit a piece. The print view should refuse to print, or mark the card incomplete, until all three numbers are filled in.
+
+Quantity, color, and paint-yourself describe the line. Source and gallery describe the visit, so they live on the request. If the proposed schema has no `purchase_request_items` table, put the three line columns on `purchase_requests` instead.
+
+```sql
+alter table public.purchase_requests
+  add column source text not null default 'web'
+    check (source in ('web', 'gallery_qr')),
+  add column gallery_location text;
+
+alter table public.purchase_request_items
+  add column quantity integer not null default 1
+    check (quantity > 0),
+  add column color_preference text,
+  add column paint_yourself boolean not null default false;
+```
+
+`color_preference` must be one of that product’s `available_colors`, or empty when the product has no colors. `paint_yourself` may be true only when `paint_yourself_available` is true.
+
+### Stripe Checkout and stock
+
+Follow the same payment rule as the rest of this plan: a successful-looking return URL is not proof of payment.
+
+1. Save the proposed `purchase_requests` row first, with `source = 'gallery_qr'`, the `gallery_location`, and the line (quantity, color, paint-yourself). It is not paid yet.
+2. Create a Stripe Checkout Session. The line item is the product name, the quantity, and the unit amount. Use `paint_yourself_price_cents` when paint-yourself is checked and that price is set. Otherwise use the normal product price.
+3. Put the request id, product id, color, paint-yourself flag, `source`, and `gallery_location` in the session metadata. Stripe shows the line items to the customer; the metadata is for your webhook.
+4. When Stripe sends `checkout.session.completed` and the signature matches, create the proposed `orders` row with its Stripe payment status set to paid, and attach it to that purchase request.
+5. Decrement proposed `inventory` in that same step, once. A second delivery of the same event must not decrement again.
+
+Stock at zero is a made-to-order piece, which is normal for molds. Still let the visitor order. Show a lead time on the QR page and on the card when you know it. Leave inventory at zero instead of going negative, and mark the order as a backorder so you can cast it after the show. The open questions below are the place to change that rule.
+
+### Gallery operations
+
+Each printed batch can name where it hangs. The `loc` query on the QR is stored as `gallery_location` (a short label such as `casco-viejo` or `feria-2026`). You can also add `utm_source=gallery`, `utm_medium=qr`, and `utm_campaign=<location>` on the same URL. The columns are what the admin list filters on. The UTM tags are a spare copy if you later read traffic in an analytics tool.
+
+An admin view can list proposed orders (or purchase requests) where `source = 'gallery_qr'`, grouped by `gallery_location`, with color, paint-yourself, quantity, and payment status. That view is behind the same admin login as the rest of the shop (`admin_users`). It can be a filter on the orders screen you already plan, rather than a new app.
+
+Wi-Fi: the QR code is only a link. The phone has to open your site and reach Stripe. On gallery Wi-Fi, or on the visitor’s mobile data, that works. With neither, the camera can still read the code and the visitor can open it later. Print one line on the card: “Order on your phone. Gallery Wi-Fi or mobile data.” Taking the whole order offline and syncing it later is a different project.
+
+### Open questions
+
+- [ ] Pickup at the gallery, ship to an address, or both?
+- [ ] Do any colors cost extra, or is color only a note on the order?
+- [ ] What lead time do you promise when stock is 0?
+- [ ] Is paint-yourself cheaper, the same price, or only offered on some pieces?
+- [ ] Will more than one gallery or event be open at the same time?
+- [ ] Card language: Spanish, English, or both on every card?
+- [ ] Is showing inches next to centimeters what you want on the printed card?
+
+### Rough size of the work
+
+Do this after the shop is on Vercel and Supabase and the Stripe webhook from section 7 exists.
+
+| Work | Rough time |
+| --- | --- |
+| Add the columns above and the three measurement fields on the admin product form | about 1 day |
+| Print gallery card view (photo, name, price, size, QR, PDF and PNG) | about 1 day |
+| Mobile order page: quantity, color, paint-yourself, contact, size | 1–2 days |
+| Checkout Session metadata, then create the order and decrement inventory only in the webhook | about 1 day |
+| Admin filter for gallery orders | about half a day |
+
+A first version is **about 4–6 days** after the move in the rest of this file. It is shorter when the proposed purchase-request tables and the webhook are already in place.
+
+Later code pull requests for this feature should still avoid secrets, and should leave this plan as the description of the behavior.
