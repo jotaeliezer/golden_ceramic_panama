@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img">
+  <rect width="800" height="1000" fill="#F2F0E6"/>
+  
+    <g fill="none" stroke="#2D2D2D" stroke-width="10">
+      <rect x="280" y="160" width="240" height="40"/>
+      <path d="M300 200 C260 280 250 340 270 420 H530 C550 340 540 280 500 200"/>
+      <rect x="250" y="420" width="300" height="50"/>
+      <rect x="210" y="500" width="380" height="70"/>
+      <rect x="170" y="600" width="460" height="90"/>
+      <rect x="140" y="730" width="520" height="110"/>
+    </g>
+    <circle cx="400" cy="245" r="18" fill="#C9A24A"/>
+  
+</svg>
