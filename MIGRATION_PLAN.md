@@ -71,8 +71,8 @@ Rough time, working carefully and learning the dashboards as you go: **about 3 t
 
 ## 1. Supabase project and schema
 
-1. Create a free Supabase account and a new project. Pick a region close to your customers. Save the database password in a password manager, not in Git.
-2. Open the SQL editor and run the script below. It matches the four tables in `src/db.ts`. Column `imageUrl` from SQLite becomes `image_url` here; the API should still send the browser a field named `imageUrl`, so the React pages do not have to change.
+1. Use the Supabase project that already exists. Its name and URL are in **Proposed Supabase database schema**. Do not create a second project. Save the database password in a password manager, not in Git.
+2. The script below is a close copy of the four tables in `src/db.ts`, so you can see where today's columns go. Column `imageUrl` from SQLite becomes `image_url` here. The tables to create in the empty project are the fuller sketch in **Proposed Supabase database schema**. Do not run both scripts.
 3. `stripe_session_id` is new. It lets the webhook find the order Stripe just finished. It is not in SQLite today.
 4. `password_hash` replaces the plain-text `password` column. Do not copy the demo password into this table.
 5. Row Level Security is turned on for every table, with no public policies. That means the publishable/anon key cannot read or write anything. The server’s secret key bypasses those rules, which is what we want while all writes go through Vercel.
@@ -122,7 +122,7 @@ alter table public.order_items enable row level security;
 alter table public.admin_users enable row level security;
 ```
 
-Leave it that way for launch. Add a public read policy on `products` only if a later change reads products from the browser:
+The policy below matches this close copy of today's tables, which has no `active` flag. For the empty project, use the proposed schema and its policy instead of this one:
 
 ```sql
 create policy "public can read products"
@@ -135,6 +135,131 @@ using (true);
 Do not add policies that let `anon` read or write `orders`, `order_items`, or `admin_users`.
 
 Prices in the current checkout code are charged in US dollars (`currency: 'usd'`). This plan does not change that.
+
+Where this section still shows `products.stock` or a `password_hash` column, the next section is the newer target.
+
+## Proposed Supabase database schema
+
+A Supabase project named `golden-ceramic-panama` already exists in US East. Its URL is `https://gufygpuvkmixwerqzfyv.supabase.co`. It has no tables yet. The sketches below are the tables to create there later. This pull request does not run them, and it does not include any keys.
+
+The customer site, the admin area, and the upcoming admin mobile photo-capture app all read and write this same database. In that app, a photo plus a quantity creates one `products` row and one `inventory` row.
+
+`products` is the catalog: name, price, and photo. `inventory` is the stock. Each stock record has its own id, and `inventory.product_id` points at the catalog row. Stock is not stored on `products`. The photo app and the admin area write both tables. The public shop does not.
+
+These are sketches for a later change. They are not a migration that has been applied.
+
+```sql
+create type public.payment_status as enum ('pending', 'paid', 'failed', 'refunded');
+
+create table public.customers (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  email text not null unique,
+  phone text,
+  address_line1 text,
+  address_line2 text,
+  city text,
+  region text,
+  postal_code text,
+  country text,
+  created_at timestamptz not null default now()
+);
+
+create table public.products (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  price_cents integer not null check (price_cents >= 0),
+  currency text not null default 'usd',
+  photo_path text,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.inventory (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references public.products (id),
+  quantity_on_hand integer not null default 0 check (quantity_on_hand >= 0),
+  location text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.purchase_requests (
+  id uuid primary key default gen_random_uuid(),
+  customer_id uuid not null references public.customers (id),
+  status text not null default 'submitted'
+    check (status in ('submitted', 'canceled')),
+  total_cents integer not null check (total_cents >= 0),
+  created_at timestamptz not null default now()
+);
+
+create table public.purchase_request_items (
+  id uuid primary key default gen_random_uuid(),
+  purchase_request_id uuid not null references public.purchase_requests (id),
+  product_id uuid not null references public.products (id),
+  quantity integer not null check (quantity > 0),
+  unit_price_cents integer not null check (unit_price_cents >= 0)
+);
+
+create table public.orders (
+  id uuid primary key default gen_random_uuid(),
+  purchase_request_id uuid not null references public.purchase_requests (id),
+  customer_id uuid not null references public.customers (id),
+  stripe_checkout_session_id text unique,
+  stripe_payment_intent_id text,
+  payment_status public.payment_status not null default 'pending',
+  amount_cents integer not null check (amount_cents >= 0),
+  currency text not null default 'usd',
+  paid_at timestamptz
+);
+
+create table public.admin_users (
+  id uuid primary key references auth.users (id) on delete cascade,
+  role text not null default 'admin' check (role in ('admin')),
+  created_at timestamptz not null default now()
+);
+```
+
+How the pieces fit:
+
+- **Customers.** One row per person: name, email, phone, and shipping address. Today's checkout stores the email and the whole address as one text blob on the order. Those fields move here.
+- **Products.** One catalog row per mold: name, description, price in cents, currency, and `photo_path`. `photo_path` is the file's path in Supabase Storage (the app can turn that into a URL). `active` hides a product from the shop without deleting it. Today's `products.price` is a dollar amount; cents match what Stripe charges. Today's `category` column is not in this sketch. Add it later if the shop still groups molds that way.
+- **Inventory.** One stock record per row, linked with `product_id`. `quantity_on_hand` is how many of that product are at `location`. A product can have more than one inventory row (for example two shelves). The photo-capture app writes the product and then an inventory row whose quantity is the number just counted.
+- **Purchase requests.** Saving the cart at checkout creates one `purchase_requests` row and one `purchase_request_items` row per line. The child table is the stand-in for a JSON blob of items: each line keeps a product id, a quantity, and the price at that moment. This replaces today's `order_items`.
+- **Orders.** One payment record for a purchase request. It stores the Stripe Checkout session id and, when Stripe sends it, the payment intent id. `payment_status` stays `pending` until the webhook runs. Only then does it become `paid`, `paid_at` is set, and `inventory.quantity_on_hand` is reduced. A failed or expired payment becomes `failed` and does not change stock. `refunded` is for a later refund. Do not reduce stock when the purchase request is first saved.
+- **Admin users.** Logins are not hard-coded, and this table does not store a password. Create the person in Supabase Auth. Auth keeps the credential. Then add a row in `admin_users` whose `id` is that same `auth.users.id`, plus a `role`. The demo plain-text password in `src/db.ts` does not belong here. Later sections still describe a custom JWT and a password hash, which is how the current site logs in. For these new tables, use this Supabase Auth link instead of a password column.
+
+Today's SQLite tables map like this:
+
+| SQLite today | Proposed table |
+| --- | --- |
+| `products` (name, description, dollar price, `imageUrl`, `stock`) | `products` for the catalog, photo, and price. `inventory` for the quantity. |
+| `orders` (email, total, shipping text, fulfillment status) | `customers` for who and where. `purchase_requests` for the submitted cart. `orders` for the Stripe payment. |
+| `order_items` | `purchase_request_items` |
+| `admin_users` (email and plain-text password) | `admin_users` linked to Supabase Auth. No password column. |
+
+There is no `customers` or `inventory` table today. New ids are UUIDs. Nothing in Git has production ids that must be kept.
+
+Row security, in short: turn it on for every table above. Customers (the public shop) may read `products` only where `active` is true. They do not get policies to read inventory, other people's details, purchase requests, or orders. Admin writes — including the photo app creating a product and an inventory row, and the webhook reducing quantity — go through an admin signed in with Supabase Auth, or through a server-side function. The webhook is the only place that marks an order `paid` and changes stock.
+
+```sql
+alter table public.products enable row level security;
+alter table public.inventory enable row level security;
+alter table public.customers enable row level security;
+alter table public.purchase_requests enable row level security;
+alter table public.purchase_request_items enable row level security;
+alter table public.orders enable row level security;
+alter table public.admin_users enable row level security;
+
+create policy "customers read active products"
+on public.products
+for select
+to anon, authenticated
+using (active = true);
+```
 
 ## 2. Existing SQLite data
 
@@ -159,7 +284,7 @@ In Supabase, use **Table Editor → Import** from CSV, products first, then orde
 
 Afterward, add `sqlite.db` and `*.db` to `.gitignore` in the code pull request so a local database cannot be committed by mistake. It is not ignored today.
 
-Create the real admin only after passwords are hashed (next section). Generate the hash on your machine or in a one-off server script. Store `ADMIN_EMAIL` and `ADMIN_PASSWORD` in Vercel if a script needs them, then you can remove the password variable after the row exists. Do not commit the hash or the password.
+Create the real admin in Supabase Auth, then link that person in `admin_users`, as described in **Proposed Supabase database schema**. Do not import the demo password, and do not commit a password or a hash.
 
 ## 3. Express on Vercel
 
