@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
@@ -6,7 +7,13 @@ import jwt from "jsonwebtoken";
 import db from "./src/db.js";
 import Stripe from "stripe";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-default-key-golden-ceramic';
+const JWT_SECRET = process.env.JWT_SECRET?.trim();
+if (!JWT_SECRET) {
+  console.error(
+    "JWT_SECRET is required and must be non-empty. Set it in the environment or in a .env file before starting the server."
+  );
+  process.exit(1);
+}
 
 let stripeClient: Stripe | null = null;
 function getStripe(): Stripe {
@@ -22,7 +29,7 @@ function getStripe(): Stripe {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
   app.use(cors());
