@@ -34,7 +34,11 @@ export default function LanguageToggle({ compact = false }: { compact?: boolean 
               onClick={() => setLocale(option.locale)}
               className={`px-0.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
                 compact ? "py-1" : "min-h-11 min-w-11"
-              } ${selected ? "font-semibold text-charcoal" : "font-normal text-charcoal/40 hover:text-gold"}`}
+              } ${
+                selected
+                  ? "font-semibold text-charcoal border-b border-gold"
+                  : "font-normal text-charcoal/40 hover:text-gold"
+              }`}
             >
               {option.code}
             </button>
