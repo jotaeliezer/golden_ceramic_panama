@@ -3,8 +3,10 @@ import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { Product } from "../types";
 import { useCart } from "../store/CartContext";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function ProductDetail() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
@@ -60,7 +62,7 @@ export default function ProductDetail() {
           <div className="flex items-center border border-charcoal/20">
             <button
               type="button"
-              aria-label="Decrease quantity"
+              aria-label={t("product.decrease")}
               onClick={() => setQty(Math.max(1, qty - 1))}
               className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >-</button>
@@ -70,11 +72,11 @@ export default function ProductDetail() {
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-10 text-center appearance-none outline-none font-medium bg-transparent text-sm"
               readOnly
-              aria-label="Quantity"
+              aria-label={t("product.quantity")}
             />
             <button
               type="button"
-              aria-label="Increase quantity"
+              aria-label={t("product.increase")}
               onClick={() => setQty(qty + 1)}
               className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >+</button>
@@ -84,18 +86,18 @@ export default function ProductDetail() {
             onClick={handleAdd}
             className="flex-1 border border-charcoal bg-transparent hover:bg-charcoal hover:text-white text-charcoal h-12 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors"
           >
-            {added ? "Added to Cart" : "Add to Cart"}
+            {added ? t("product.added") : t("product.add")}
           </button>
         </div>
         
         <div className="pt-8 border-t border-charcoal/10 mt-auto">
           <p className="text-[11px] uppercase tracking-widest text-charcoal/60 mb-2">
-            <span className="font-bold text-charcoal mr-2">Status:</span>
-            {product.stock > 0 ? `${product.stock} Units Expected` : "Out of stock"}
+            <span className="font-bold text-charcoal mr-2">{t("product.status")}</span>
+            {product.stock > 0 ? t("product.units", { count: product.stock }) : t("product.outOfStock")}
           </p>
           <p className="text-[11px] uppercase tracking-widest text-charcoal/60">
-            <span className="font-bold text-charcoal mr-2">Fulfillment:</span>
-            Calculated at checkout.
+            <span className="font-bold text-charcoal mr-2">{t("product.fulfillment")}</span>
+            {t("product.fulfillmentValue")}
           </p>
         </div>
       </motion.div>
