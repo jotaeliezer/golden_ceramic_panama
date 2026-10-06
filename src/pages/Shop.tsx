@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Product } from "../types";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Shop() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ export default function Shop() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-[10px] uppercase tracking-[0.3em] font-semibold animate-pulse text-charcoal">Curating Selection...</div>
+        <div className="text-[10px] uppercase tracking-[0.3em] font-semibold animate-pulse text-charcoal">{t("shop.loading")}</div>
       </div>
     );
   }
@@ -28,13 +30,16 @@ export default function Shop() {
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
       <header className="mb-16 pb-8 border-b border-charcoal/10">
-        <span className="text-[10px] uppercase tracking-[0.3em] font-semibold mb-3 block opacity-60">Full Catalog</span>
-        <h1 className="font-serif text-5xl text-charcoal font-light mb-6">The Collection</h1>
+        <span className="text-[10px] uppercase tracking-[0.3em] font-semibold mb-3 block opacity-60">{t("shop.kicker")}</span>
+        <h1 className="font-serif text-5xl text-charcoal font-light mb-6">{t("shop.title")}</h1>
         <p className="text-charcoal-light leading-relaxed max-w-xl">
-          Browse our entire selection of premium ceramic and plaster molds. Each piece is designed for precision casting and timeless aesthetics.
+          {t("shop.body")}
         </p>
       </header>
       
+      {products.length === 0 ? (
+        <p className="text-center font-serif text-2xl font-light text-charcoal-light py-16">{t("shop.empty")}</p>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
         {products.map((p, i) => (
           <motion.div 
@@ -61,6 +66,7 @@ export default function Shop() {
           </motion.div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Product } from "../../types";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
@@ -22,7 +22,7 @@ export default function AdminProducts() {
     fetchProducts();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const isUpdate = !!currentId;
     const url = isUpdate ? `/api/products/${currentId}` : '/api/products';

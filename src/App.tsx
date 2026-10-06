@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./store/CartContext";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 // Components (we'll implement next)
 import Layout from "./components/Layout";
@@ -23,7 +24,8 @@ import AdminProducts from "./pages/admin/AdminProducts";
 
 export default function App() {
   return (
-    <CartProvider>
+    <LanguageProvider>
+      <CartProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -45,5 +47,6 @@ export default function App() {
         </Routes>
       </Router>
     </CartProvider>
+    </LanguageProvider>
   );
 }

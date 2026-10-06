@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Product } from "../types";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
   const [featured, setFeatured] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function Home() {
       <section className="relative max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 py-16 md:py-24 items-center min-h-[70vh]">
         <div className="col-span-1 md:col-span-5 relative z-10">
           <div className="inline-block bg-gold text-white px-3 py-1 text-[10px] uppercase tracking-widest mb-6">
-            Limited Release
+            {t("home.limited")}
           </div>
           <motion.h1 
             initial={{ opacity: 0, y: 15 }}
@@ -31,7 +33,7 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-6xl md:text-7xl font-serif leading-[0.9] mb-8 font-light text-charcoal"
           >
-            The Art of the <br/><i className="text-gold">Mold</i>
+            {t("home.heroLead")} <br/><i className="text-gold">{t("home.heroEmphasis")}</i>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -39,13 +41,13 @@ export default function Home() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-lg leading-relaxed opacity-80 mb-10 pr-0 md:pr-12 text-charcoal-light"
           >
-            Discover our handcrafted collection of architectural ceramic molds. Designed in Panama for the global artisan, bridging technical precision with classic luxury.
+            {t("home.heroBody")}
           </motion.p>
           <Link 
             to="/shop" 
             className="inline-block border border-charcoal px-10 py-4 text-xs uppercase tracking-[0.3em] font-semibold hover:bg-charcoal hover:text-white transition-colors"
           >
-            View Catalog
+            {t("home.viewCatalog")}
           </Link>
         </div>
 
@@ -54,15 +56,15 @@ export default function Home() {
             <div className="absolute inset-0 border-[24px] border-ivory opacity-20 pointer-events-none z-10"></div>
             <img 
               src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=1200&auto=format&fit=crop" 
-              alt="Artisan Ceramic Mold" 
+              alt={t("home.heroAlt")} 
               className="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-1000 hover:scale-105"
             />
           </div>
           
           {/* Floating Overlay Label */}
           <div className="hidden lg:block absolute -bottom-8 -left-12 bg-charcoal text-white p-6 w-64 shadow-xl z-20">
-            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">Material Detail</p>
-            <p className="text-sm italic font-serif">"Engineered resin composite with high-thermal resistance for flawless extraction."</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">{t("home.material")}</p>
+            <p className="text-sm italic font-serif">{t("home.materialQuote")}</p>
           </div>
         </div>
       </section>
@@ -71,11 +73,11 @@ export default function Home() {
       <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto w-full border-t border-charcoal/10">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.3em] font-semibold mb-2 block opacity-60">Selection</span>
-            <h2 className="font-serif text-3xl font-light text-charcoal">Curated Series</h2>
+            <span className="text-[10px] uppercase tracking-[0.3em] font-semibold mb-2 block opacity-60">{t("home.selection")}</span>
+            <h2 className="font-serif text-3xl font-light text-charcoal">{t("home.curated")}</h2>
           </div>
           <div className="text-right hidden sm:block">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold mb-1">Inquiry</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold mb-1">{t("home.inquiry")}</p>
             <p className="text-xs font-serif opacity-60">info@goldenceramic.pa</p>
           </div>
         </div>
