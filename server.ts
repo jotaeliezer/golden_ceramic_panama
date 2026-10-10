@@ -37,9 +37,125 @@ function getStripe(): Stripe {
   return stripeClient;
 }
 
+function orderIdFromCheckoutSession(session: Stripe.Checkout.Session): string | null {
+  const fromMetadata = session.metadata?.orderId?.trim();
+  if (fromMetadata) return fromMetadata;
+  const fromReference = session.client_reference_id?.trim();
+  if (fromReference) return fromReference;
+  return null;
+}
+
+// Stock moves only here, and only once. A Stripe retry sees status "paid" and stops.
+// orders has no session or payment_intent column, so those ids are not stored.
+function markOrderPaidAndLowerStock(orderId: string): "paid" | "already_paid" | "missing" {
+  const apply = db.transaction((): "paid" | "already_paid" | "missing" => {
+    const claimed = db
+      .prepare("UPDATE orders SET status = 'paid' WHERE id = ? AND status != 'paid'")
+      .run(orderId);
+    if (claimed.changes === 0) {
+      const existing = db.prepare("SELECT id FROM orders WHERE id = ?").get(orderId);
+      return existing ? "already_paid" : "missing";
+    }
+
+    const items = db
+      .prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?")
+      .all(orderId) as { product_id: string; quantity: number }[];
+    const updateStock = db.prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+    for (const item of items) {
+      updateStock.run(item.quantity, item.product_id);
+    }
+    return "paid";
+  });
+  return apply();
+}
+
+function markPendingOrderCanceled(orderId: string): "canceled" | "unchanged" | "missing" {
+  const apply = db.transaction((): "canceled" | "unchanged" | "missing" => {
+    const existing = db.prepare("SELECT status FROM orders WHERE id = ?").get(orderId) as
+      | { status: string }
+      | undefined;
+    if (!existing) return "missing";
+    if (existing.status !== "pending") return "unchanged";
+    db.prepare("UPDATE orders SET status = 'canceled' WHERE id = ? AND status = 'pending'").run(orderId);
+    return "canceled";
+  });
+  return apply();
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Raw body required for signature verification. Must run before express.json().
+  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
+    const signature = req.headers["stripe-signature"];
+    if (!signature || (!Buffer.isBuffer(req.body) && typeof req.body !== "string")) {
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+    if (!webhookSecret) {
+      console.warn("STRIPE_WEBHOOK_SECRET is not set. Refusing the webhook.");
+      return res.status(500).json({ error: "Webhook secret is not configured" });
+    }
+
+    let stripe: Stripe;
+    try {
+      stripe = getStripe();
+    } catch (err: any) {
+      console.warn(err.message);
+      return res.status(500).json({ error: "Stripe is not configured" });
+    }
+
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+    } catch {
+      console.warn("Stripe webhook signature verification failed.");
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    try {
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.payment_status === "paid") {
+          const orderId = orderIdFromCheckoutSession(session);
+          if (!orderId) {
+            console.warn("checkout.session.completed had no metadata.orderId or client_reference_id.");
+          } else {
+            const result = markOrderPaidAndLowerStock(orderId);
+            if (result === "paid") {
+              console.log(`Order ${orderId} marked paid. Stock lowered.`);
+            } else if (result === "already_paid") {
+              console.log(`Order ${orderId} is already paid. Stock left unchanged.`);
+            } else {
+              console.warn(`No order found for ${orderId}. Stock left unchanged.`);
+            }
+          }
+        }
+      } else if (event.type === "checkout.session.expired") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId = orderIdFromCheckoutSession(session);
+        if (!orderId) {
+          console.warn("checkout.session.expired had no metadata.orderId or client_reference_id.");
+        } else {
+          const result = markPendingOrderCanceled(orderId);
+          if (result === "canceled") {
+            console.log(`Order ${orderId} marked canceled. Stock unchanged.`);
+          } else if (result === "missing") {
+            console.warn(`No order found for expired session ${orderId}.`);
+          } else {
+            console.log(`Order ${orderId} was not pending. Expired event left it unchanged.`);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn("Stripe webhook failed while updating the order.", err?.message ?? err);
+      return res.status(500).json({ error: "Webhook handler failed" });
+    }
+
+    return res.status(200).json({ received: true });
+  });
 
   app.use(express.json());
   app.use(cors());
@@ -116,18 +232,14 @@ async function startServer() {
           return { productId: item.id, quantity: item.quantity, price };
         });
 
-        // Insert Order
-        db.prepare("INSERT INTO orders (id, customer_email, total_amount, shipping_address) VALUES (?, ?, ?, ?)").run(
-          orderId, customerEmail, totalAmount, shippingAddress
+        // Orders start pending. Stock is checked above and lowered only after Stripe confirms payment.
+        db.prepare("INSERT INTO orders (id, customer_email, total_amount, shipping_address, status) VALUES (?, ?, ?, ?, ?)").run(
+          orderId, customerEmail, totalAmount, shippingAddress, "pending"
         );
 
-        // Insert Items and reduce stock
         const insertItem = db.prepare("INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
-        const updateStock = db.prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
-        
         processedItems.forEach((pi, index) => {
            insertItem.run(`${orderId}_item_${index}`, orderId, pi.productId, pi.quantity, pi.price);
-           updateStock.run(pi.quantity, pi.productId);
         });
 
         return { orderId, lineItems };
@@ -145,6 +257,8 @@ async function startServer() {
           success_url: `${process.env.APP_URL || 'http://localhost:3000'}?success=true&orderId=${orderId}`,
           cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/cart?canceled=true`,
           customer_email: customerEmail,
+          client_reference_id: orderId,
+          metadata: { orderId },
         });
         checkoutUrl = session.url;
       } catch (e: any) {
