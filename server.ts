@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
@@ -8,13 +9,29 @@ import Stripe from "stripe";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-default-key-golden-ceramic';
 
+// Test mode is the default. Checkout sessions are created only with an sk_test_ key
+// unless STRIPE_ALLOW_LIVE=true is set explicitly.
+function assertStripeKeyAllowed(key: string): void {
+  if (key.startsWith("sk_test_")) return;
+
+  const allowLive = process.env.STRIPE_ALLOW_LIVE === "true";
+  if (allowLive && key.startsWith("sk_live_")) return;
+
+  const message = key.startsWith("sk_live_")
+    ? "Refusing to create a Stripe Checkout session: STRIPE_SECRET_KEY is a live key (sk_live_). Test mode is the default, so no Checkout session was created and no real charge can be made. Use a test secret key (sk_test_) from the Stripe Dashboard with Test mode turned on, or set STRIPE_ALLOW_LIVE=true to opt in to live charges."
+    : "Refusing to create a Stripe Checkout session: STRIPE_SECRET_KEY must be a test secret key starting with sk_test_. Test mode is the default. Set STRIPE_ALLOW_LIVE=true only when you intentionally pass an sk_live_ key.";
+  console.warn(message);
+  throw new Error(message);
+}
+
 let stripeClient: Stripe | null = null;
 function getStripe(): Stripe {
   if (!stripeClient) {
-    const key = process.env.STRIPE_SECRET_KEY;
+    const key = process.env.STRIPE_SECRET_KEY?.trim();
     if (!key) {
       throw new Error('STRIPE_SECRET_KEY environment variable is required to process real payments.');
     }
+    assertStripeKeyAllowed(key);
     stripeClient = new Stripe(key);
   }
   return stripeClient;
