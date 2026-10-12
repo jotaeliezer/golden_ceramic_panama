@@ -19,7 +19,7 @@ FROM (
       'Molde de columna estriada',
       'Molde rígido en dos mitades para vaciar una columna con estrías verticales, en yeso o cerámica. El fuste sale listo para lijar y pintar en el taller.',
       '128',
-      '/molds/columna.svg',
+      '/pieces/columna.webp',
       'Columnas',
       '8'
     ),
@@ -28,7 +28,7 @@ FROM (
       'Molde de pedestal barroco',
       'Pedestal con volutas y base escalonada, para jardín o interior. Aguanta vaciados repetidos en yeso de fundición.',
       '215',
-      '/molds/pedestal.svg',
+      '/pieces/pedestal.webp',
       'Pedestales',
       '4'
     ),
@@ -37,7 +37,7 @@ FROM (
       'Molde de maceta art déco',
       'Maceta de cuerpo geométrico con franjas escalonadas. Sirve para cerámica de colada o yeso, y el fondo trae marcado el orificio de drenaje.',
       '96',
-      '/molds/maceta.svg',
+      '/pieces/maceta.webp',
       'Macetas',
       '14'
     ),
@@ -46,7 +46,7 @@ FROM (
       'Molde de ángel de jardín',
       'Figura de jardín en dos piezas, con las alas en relieve. Se vierte yeso o pasta cerámica de colada y se une por la costura central.',
       '168',
-      '/molds/angel.svg',
+      '/pieces/angel.webp',
       'Jardín',
       '6'
     ),
@@ -55,7 +55,7 @@ FROM (
       'Molde de fuente de pared',
       'Placa con concha y mascarón para una fuente de pared. El molde deja marcada la salida del caño.',
       '240',
-      '/molds/fuente.svg',
+      '/pieces/fuente.webp',
       'Fuentes',
       '3'
     ),
@@ -64,7 +64,7 @@ FROM (
       'Molde de marco ornamental',
       'Marco rectangular con hoja de acanto en las esquinas, para vaciar un marco de yeso que después se puede dorar o pintar.',
       '74',
-      '/molds/marco.svg',
+      '/pieces/marco.webp',
       'Ornamento',
       '18'
     ),
@@ -73,7 +73,7 @@ FROM (
       'Molde de baldosa hidráulica',
       'Baldosa cuadrada con estrella de ocho puntas, al estilo de los pisos antiguos de la ciudad. El molde es de una sola cara.',
       '52',
-      '/molds/baldosa.svg',
+      '/pieces/baldosa.webp',
       'Baldosas',
       '30'
     ),
@@ -82,7 +82,7 @@ FROM (
       'Molde de jarrón clásico',
       'Jarrón de cuello estrecho y panza ovalada, en dos mitades, para colada de cerámica. La boca queda abierta para el vaciado.',
       '110',
-      '/molds/jarron.svg',
+      '/pieces/jarron.webp',
       'Jarrones',
       '11'
     ),
@@ -91,7 +91,7 @@ FROM (
       'Molde de cornisa corrida',
       'Perfil de cornisa con dentículos, para tirar un tramo de yeso y cortarlo a la medida de la pared.',
       '88',
-      '/molds/cornisa.svg',
+      '/pieces/cornisa.webp',
       'Coronas',
       '16'
     ),
@@ -100,7 +100,7 @@ FROM (
       'Molde de rosetón de techo',
       'Rosetón circular con pétalos para el centro de un techo. El anillo interior deja el paso de la lámpara.',
       '142',
-      '/molds/roseton.svg',
+      '/pieces/roseton.webp',
       'Techos',
       '7'
     )
