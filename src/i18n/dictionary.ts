@@ -49,11 +49,17 @@ const es = {
     "“Nuestro taller y laboratorio principal, en el corazón de la Ciudad de Panamá.”",
 
   "shop.loading": "Preparando la selección...",
-  "shop.kicker": "Catálogo completo",
+  "shop.kicker": "Por categoría",
   "shop.title": "La Colección",
   "shop.body":
-    "Recorra toda nuestra selección de moldes de cerámica y yeso. Cada pieza está pensada para un vaciado preciso y una estética atemporal.",
+    "Elija una categoría para ver los moldes de esa serie. Cada pieza está pensada para un vaciado preciso y una estética atemporal.",
   "shop.empty": "La colección está vacía por ahora.",
+  "shop.countOne": "1 molde",
+  "shop.countMany": "{count} moldes",
+  "shop.backButton": "Volver a las categorías",
+  "shop.backLink": "Todas las categorías",
+  "shop.categoryKicker": "Categoría",
+  "shop.notFound": "No encontramos esta categoría.",
 
   "product.decrease": "Disminuir cantidad",
   "product.increase": "Aumentar cantidad",
@@ -65,6 +71,8 @@ const es = {
   "product.outOfStock": "Agotado",
   "product.fulfillment": "Entrega:",
   "product.fulfillmentValue": "Se calcula al finalizar la compra.",
+  "product.backToCategory": "Volver a {category}",
+  "product.backToShop": "Volver a la colección",
 
   "cart.emptyTitle": "Su carrito está vacío",
   "cart.return": "Volver a la colección",
@@ -160,11 +168,17 @@ const en: { [K in MessageKey]: string } = {
     '"Our primary studio and laboratory located in the heart of Panama City."',
 
   "shop.loading": "Curating Selection...",
-  "shop.kicker": "Full Catalog",
+  "shop.kicker": "By category",
   "shop.title": "The Collection",
   "shop.body":
-    "Browse our entire selection of premium ceramic and plaster molds. Each piece is designed for precision casting and timeless aesthetics.",
+    "Choose a category to see the molds in that series. Each piece is designed for precision casting and timeless aesthetics.",
   "shop.empty": "The collection is empty for now.",
+  "shop.countOne": "1 mold",
+  "shop.countMany": "{count} molds",
+  "shop.backButton": "Back to categories",
+  "shop.backLink": "All categories",
+  "shop.categoryKicker": "Category",
+  "shop.notFound": "This category could not be found.",
 
   "product.decrease": "Decrease quantity",
   "product.increase": "Increase quantity",
@@ -176,6 +190,8 @@ const en: { [K in MessageKey]: string } = {
   "product.outOfStock": "Out of stock",
   "product.fulfillment": "Fulfillment:",
   "product.fulfillmentValue": "Calculated at checkout.",
+  "product.backToCategory": "Back to {category}",
+  "product.backToShop": "Back to the collection",
 
   "cart.emptyTitle": "Your Registry is Empty",
   "cart.return": "Return to Collection",

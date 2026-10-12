@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { Product } from "../types";
 import { useCart } from "../store/CartContext";
 import { useLanguage } from "../i18n/LanguageContext";
+import { categorySlug } from "../lib/categories";
 
 export default function ProductDetail() {
   const { t } = useLanguage();
@@ -28,8 +30,19 @@ export default function ProductDetail() {
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const categoryName = product.category?.trim() ?? "";
+  const categoryHref = categoryName ? `/shop/${categorySlug(categoryName)}` : "/shop";
+
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 lg:py-24 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+    <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 md:py-16 lg:py-24">
+      <Link
+        to={categoryHref}
+        className="inline-flex min-h-11 items-center gap-2 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold border-b border-charcoal/30 pb-1 hover:border-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+        {categoryName ? t("product.backToCategory", { category: categoryName }) : t("product.backToShop")}
+      </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -101,6 +114,7 @@ export default function ProductDetail() {
           </p>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }
