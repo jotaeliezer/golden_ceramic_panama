@@ -109,6 +109,20 @@ const es = {
   "thanks.catalog": "Volver al catálogo",
   "thanks.paid": "Pago confirmado",
   "thanks.pending": "Procesando pago…",
+
+  "category.columnas": "Columnas",
+  "category.pedestales": "Pedestales",
+  "category.macetas": "Macetas",
+  "category.jardin": "Jardín",
+  "category.fuentes": "Fuentes",
+  "category.ornamento": "Ornamento",
+  "category.baldosas": "Baldosas",
+  "category.jarrones": "Jarrones",
+  "category.coronas": "Coronas",
+  "category.techos": "Techos",
+
+  "checkout.items": "Su pedido",
+  "thanks.items": "Piezas",
 } as const;
 
 export type MessageKey = keyof typeof es;
@@ -220,6 +234,20 @@ const en: { [K in MessageKey]: string } = {
   "thanks.catalog": "Back to the catalog",
   "thanks.paid": "Payment confirmed",
   "thanks.pending": "Processing payment…",
+
+  "category.columnas": "Columns",
+  "category.pedestales": "Pedestals",
+  "category.macetas": "Planters",
+  "category.jardin": "Garden",
+  "category.fuentes": "Fountains",
+  "category.ornamento": "Ornament",
+  "category.baldosas": "Tiles",
+  "category.jarrones": "Vases",
+  "category.coronas": "Cornices",
+  "category.techos": "Ceilings",
+
+  "checkout.items": "Your order",
+  "thanks.items": "Pieces",
 };
 
 export const messages: Record<Locale, { [K in MessageKey]: string }> = { es, en };

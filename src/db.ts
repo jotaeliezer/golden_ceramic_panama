@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import postgres from "postgres";
 
@@ -88,14 +88,49 @@ export async function markPendingOrderCanceled(orderId: string): Promise<CancelC
 }
 
 /**
- * Local development only. Applies db/migrations/001_init.sql.
+ * Apply every file in db/migrations, in name order.
+ * Each file is written to be safe to run more than once.
+ */
+export async function applySchemaMigrations(): Promise<string[]> {
+  const dir = join(process.cwd(), "db/migrations");
+  const files = readdirSync(dir)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  for (const name of files) {
+    await sql.unsafe(readFileSync(join(dir, name), "utf8"));
+  }
+  return files;
+}
+
+let englishColumnsReady = false;
+
+/**
+ * True only after both English columns exist.
+ * A false result is not cached, so a migration applied while the process is up
+ * is picked up on the next write. A true result stays true.
+ */
+export async function productsHaveEnglishColumns(): Promise<boolean> {
+  if (englishColumnsReady) return true;
+  const rows = await sql<{ column_name: string }[]>`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'products'
+      AND column_name IN ('name_en', 'description_en')
+  `;
+  const names = new Set(rows.map((row) => row.column_name));
+  const ready = names.has("name_en") && names.has("description_en");
+  if (ready) englishColumnsReady = true;
+  return ready;
+}
+
+/**
+ * Local development only. Applies db/migrations/*.sql.
  * Does not create an admin user. Never runs on Vercel, and never on a request.
  */
 export async function bootstrapLocalSchema(): Promise<void> {
   if (process.env.VERCEL) return;
-
-  const migrationPath = join(process.cwd(), "db/migrations/001_init.sql");
-  await sql.unsafe(readFileSync(migrationPath, "utf8"));
+  await applySchemaMigrations();
 }
 
 export default sql;

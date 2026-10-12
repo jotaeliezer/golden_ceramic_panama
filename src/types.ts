@@ -2,6 +2,9 @@ export interface Product {
   id: string;
   name: string;
   description: string;
+  /** English name. Empty or missing means the shop shows `name`. */
+  name_en?: string | null;
+  description_en?: string | null;
   price: number;
   imageUrl: string;
   category: string;

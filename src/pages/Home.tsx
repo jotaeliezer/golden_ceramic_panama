@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Product } from "../types";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Home() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const [featured, setFeatured] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -96,12 +98,13 @@ export default function Home() {
                 <div className="aspect-square bg-ivory-focus mb-4 overflow-hidden relative">
                   <img 
                     src={p.imageUrl} 
-                    alt={p.name}
+                    alt={catalog.name(p)}
                     className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-charcoal">{p.name}</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1 block">{catalog.category(p.category)}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-charcoal">{catalog.name(p)}</span>
                   <span className="text-[10px] text-gold mt-1">${p.price.toFixed(2)} USD</span>
                 </div>
               </Link>

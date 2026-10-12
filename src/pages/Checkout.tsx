@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../store/CartContext";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const catalog = useCatalogText();
   const navigate = useNavigate();
   const leavingForThanks = useRef(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,8 @@ export default function Checkout() {
         body: JSON.stringify({
           items: items.map(i => ({ id: i.id, quantity: i.cartQuantity })),
           customerEmail: formData.email,
-          shippingAddress: `${formData.name}\n${formData.address}\n${formData.city}, ${formData.country}`
+          shippingAddress: `${formData.name}\n${formData.address}\n${formData.city}, ${formData.country}`,
+          locale,
         }),
       });
       
@@ -69,6 +72,24 @@ export default function Checkout() {
         <h1 className="font-serif text-4xl text-charcoal font-light">{t("checkout.title")}</h1>
       </header>
       
+      <section className="mb-12" aria-label={t("checkout.items")}>
+        <h2 className="text-[10px] uppercase tracking-[0.3em] font-bold mb-6 pb-2 border-b border-charcoal/10">{t("checkout.items")}</h2>
+        <ul className="space-y-4">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1">{catalog.category(item.category)}</p>
+                <p className="font-serif text-lg text-charcoal">{catalog.name(item)}</p>
+                {catalog.description(item) ? (
+                  <p className="mt-1 text-sm leading-relaxed text-charcoal-light max-w-lg">{catalog.description(item)}</p>
+                ) : null}
+              </div>
+              <p className="text-sm text-charcoal-light">× {item.cartQuantity}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <div className="bg-ivory-dark p-6 mb-12 border border-charcoal/10 text-sm">
         <p className="font-semibold text-charcoal uppercase tracking-widest text-[10px] mb-2">{t("checkout.simTitle")}</p>
         <p className="text-charcoal-light">{t("checkout.simBody")}</p>
