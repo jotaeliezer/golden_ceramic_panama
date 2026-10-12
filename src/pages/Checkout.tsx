@@ -42,8 +42,7 @@ export default function Checkout() {
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {
-          alert(t("checkout.orderCreated", { orderId: data.orderId }));
-          navigate("/");
+          navigate(`/gracias?orderId=${encodeURIComponent(data.orderId)}`);
         }
       } else {
         alert(data.error || t("checkout.failed"));

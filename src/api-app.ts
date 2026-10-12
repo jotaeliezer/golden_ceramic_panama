@@ -195,6 +195,16 @@ export function createApp(): express.Express {
     }
   });
 
+  app.get("/api/orders/:id/status", async (req, res) => {
+    try {
+      const [order] = await sql`SELECT status FROM orders WHERE id = ${req.params.id}`;
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      res.json({ status: order.status });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/checkout", async (req, res) => {
     const { items, customerEmail, shippingAddress } = req.body;
 
@@ -258,7 +268,7 @@ export function createApp(): express.Express {
           payment_method_types: ["card"],
           line_items: lineItems,
           mode: "payment",
-          success_url: `${origin}?success=true&orderId=${orderId}`,
+          success_url: `${origin}/gracias?orderId=${encodeURIComponent(orderId)}`,
           cancel_url: `${origin}/cart?canceled=true`,
           customer_email: customerEmail,
           client_reference_id: orderId,
