@@ -38,3 +38,19 @@ STRIPE_SECRET_KEY=sk_test_REPLACE_WITH_YOUR_TEST_KEY
 Replace the placeholder with your own test secret key. Never commit `.env` or a real key.
 
 On the Stripe-hosted payment page, use test card `4242 4242 4242 4242`, any future expiry date, and any CVC. No real charge is created. Stripe shows its own test-mode badge on that page.
+
+## Admin password
+
+The shop does not ship a demo admin password. Passwords are stored as bcrypt hashes. Set one against `DATABASE_URL`:
+
+```
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='choose-a-long-password' npm run admin:set-password
+```
+
+That upserts the hash for that email. To print only the hash and apply it yourself in SQL:
+
+```
+ADMIN_PASSWORD='choose-a-long-password' npm run admin:set-password -- --print-hash
+```
+
+Put the real values in the environment for that command. Do not commit them. A stored plaintext password is rejected at login.

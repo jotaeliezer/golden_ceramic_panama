@@ -100,6 +100,15 @@ const es = {
     "¡Pedido creado! (Se omitió el pago con Stripe porque falta STRIPE_SECRET_KEY). ID del pedido: {orderId}",
   "checkout.failed": "No se pudo completar el pago",
   "checkout.error": "Error al procesar el pedido.",
+
+  "thanks.kicker": "Pedido recibido",
+  "thanks.title": "Gracias por su pedido",
+  "thanks.orderLabel": "Número de pedido",
+  "thanks.note":
+    "Le enviaremos una confirmación en breve. El taller se pondrá en contacto para coordinar la entrega.",
+  "thanks.catalog": "Volver al catálogo",
+  "thanks.paid": "Pago confirmado",
+  "thanks.pending": "Procesando pago…",
 } as const;
 
 export type MessageKey = keyof typeof es;
@@ -202,6 +211,15 @@ const en: { [K in MessageKey]: string } = {
     "Order created! (Stripe Checkout skipped since STRIPE_SECRET_KEY is missing). Order ID: {orderId}",
   "checkout.failed": "Checkout failed",
   "checkout.error": "Error processing order.",
+
+  "thanks.kicker": "Order received",
+  "thanks.title": "Thank you for your order",
+  "thanks.orderLabel": "Order number",
+  "thanks.note":
+    "A confirmation will follow shortly. The workshop will be in touch about delivery.",
+  "thanks.catalog": "Back to the catalog",
+  "thanks.paid": "Payment confirmed",
+  "thanks.pending": "Processing payment…",
 };
 
 export const messages: Record<Locale, { [K in MessageKey]: string }> = { es, en };

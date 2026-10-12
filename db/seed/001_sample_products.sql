@@ -1,6 +1,6 @@
 -- Sample molds for the Panama workshop. Safe to run more than once.
 -- Products are inserted only when the products table is empty.
--- The admin row is the same demo login the admin page already shows.
+-- This file does not create an admin user. Set one with npm run admin:set-password.
 -- Apply after db/migrations/001_init.sql. The server does not run this file.
 
 INSERT INTO products (id, name, description, price, "imageUrl", category, stock)
@@ -106,9 +106,3 @@ FROM (
     )
 ) AS v(id, name, description, price, image_url, category, stock)
 WHERE NOT EXISTS (SELECT 1 FROM products);
-
-INSERT INTO admin_users (id, email, password)
-SELECT 'admin-1', 'admin@goldenceramic.com', 'admin123'
-WHERE NOT EXISTS (
-  SELECT 1 FROM admin_users WHERE email = 'admin@goldenceramic.com'
-);

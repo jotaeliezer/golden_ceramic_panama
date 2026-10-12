@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useState, useEffect } from 'react';
 import { CartItem, Product } from '../types';
 
 interface CartContextType {
@@ -52,7 +52,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    try {
+      localStorage.setItem("cart", "[]");
+    } catch {
+      // The in-memory cart is still empty if storage is blocked.
+    }
+  }, []);
 
   const total = items.reduce((sum, item) => sum + (item.price * item.cartQuantity), 0);
 

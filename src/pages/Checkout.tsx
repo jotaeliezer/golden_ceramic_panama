@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../store/CartContext";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -7,6 +7,7 @@ export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const leavingForThanks = useRef(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -16,8 +17,13 @@ export default function Checkout() {
     country: "",
   });
 
+  useEffect(() => {
+    if (items.length === 0 && !leavingForThanks.current) {
+      navigate("/shop");
+    }
+  }, [items.length, navigate]);
+
   if (items.length === 0) {
-    navigate("/shop");
     return null;
   }
 
@@ -38,12 +44,12 @@ export default function Checkout() {
       
       const data = await response.json();
       if (data.success) {
+        leavingForThanks.current = true;
         clearCart();
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {
-          alert(t("checkout.orderCreated", { orderId: data.orderId }));
-          navigate("/");
+          navigate(`/gracias?orderId=${encodeURIComponent(data.orderId)}`);
         }
       } else {
         alert(data.error || t("checkout.failed"));
