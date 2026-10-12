@@ -1,5 +1,5 @@
-import type { Locale, MessageKey } from "./dictionary";
-import { translate } from "./dictionary";
+import type { Locale, MessageKey } from "./dictionary.js";
+import { translate } from "./dictionary.js";
 
 const CATEGORY_KEYS: Record<string, MessageKey> = {
   Columnas: "category.columnas",
