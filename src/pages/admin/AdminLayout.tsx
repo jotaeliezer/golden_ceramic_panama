@@ -1,5 +1,5 @@
 import { Outlet, Navigate, NavLink } from "react-router-dom";
-import { Package, ShoppingBag, LogOut } from "lucide-react";
+import { Package, ShoppingBag, LogOut, Users } from "lucide-react";
 
 export default function AdminLayout() {
   const token = localStorage.getItem("adminToken");
@@ -19,7 +19,7 @@ export default function AdminLayout() {
     }`;
 
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex min-h-11 items-center justify-center gap-1.5 px-2 text-xs font-medium transition-colors ${
+    `flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors ${
       isActive ? "text-gold border-b-2 border-gold" : "text-gray-300 hover:text-white"
     }`;
 
@@ -34,6 +34,10 @@ export default function AdminLayout() {
           <NavLink to="/admin" end className={desktopLinkClass}>
             <ShoppingBag className="w-5 h-5 mr-3" />
             Orders
+          </NavLink>
+          <NavLink to="/admin/customers" className={desktopLinkClass}>
+            <Users className="w-5 h-5 mr-3" />
+            Customers
           </NavLink>
           <NavLink to="/admin/products" className={desktopLinkClass}>
             <Package className="w-5 h-5 mr-3" />
@@ -56,10 +60,14 @@ export default function AdminLayout() {
           <div className="px-4 pt-4 pb-3">
             <h2 className="font-serif text-lg text-gold">Admin Panel</h2>
           </div>
-          <nav aria-label="Admin" className="grid grid-cols-3 border-t border-white/10">
+          <nav aria-label="Admin" className="grid grid-cols-4 border-t border-white/10">
             <NavLink to="/admin" end className={mobileLinkClass}>
               <ShoppingBag className="w-4 h-4" aria-hidden="true" />
               Orders
+            </NavLink>
+            <NavLink to="/admin/customers" className={mobileLinkClass}>
+              <Users className="w-4 h-4" aria-hidden="true" />
+              Customers
             </NavLink>
             <NavLink to="/admin/products" className={mobileLinkClass}>
               <Package className="w-4 h-4" aria-hidden="true" />
@@ -68,7 +76,7 @@ export default function AdminLayout() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex min-h-11 items-center justify-center gap-1.5 px-2 text-xs font-medium text-gray-300 hover:text-white"
+              className="flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium text-gray-300 hover:text-white"
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
               Logout

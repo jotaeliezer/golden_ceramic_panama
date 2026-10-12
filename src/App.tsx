@@ -22,6 +22,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminCustomerDetail from "./pages/admin/AdminCustomerDetail";
 
 export default function App() {
   return (
@@ -43,6 +45,8 @@ export default function App() {
             <Route path="login" element={<AdminLogin />} />
             <Route element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
+              <Route path="customers" element={<AdminCustomers />} />
+              <Route path="customers/:email" element={<AdminCustomerDetail />} />
               <Route path="products" element={<AdminProducts />} />
             </Route>
           </Route>

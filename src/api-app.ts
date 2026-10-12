@@ -3,6 +3,8 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Stripe from "stripe";
+import { sendAdminEmails } from "./admin-email.js";
+import { getCustomer, listCustomers } from "./customers.js";
 import { markOrderPaidAndLowerStock, markPendingOrderCanceled, sql } from "./db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-default-key-golden-ceramic";
@@ -367,6 +369,58 @@ export function createApp(): express.Express {
         ordersWithItems.push({ ...order, items });
       }
       res.json(ordersWithItems);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/customers", authenticateAdmin, async (req, res) => {
+    try {
+      const customers = await listCustomers({
+        q: typeof req.query.q === "string" ? req.query.q : "",
+        sort: typeof req.query.sort === "string" ? req.query.sort : "",
+        dir: req.query.dir === "asc" ? "asc" : "desc",
+      });
+      res.json({ customers });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/customers/:email", authenticateAdmin, async (req, res) => {
+    try {
+      const raw = Array.isArray(req.params.email) ? req.params.email[0] : req.params.email;
+      let email = raw ?? "";
+      try {
+        email = decodeURIComponent(email);
+      } catch {
+        return res.status(400).json({ error: "Invalid email" });
+      }
+      const result = await getCustomer(email);
+      if (!result) return res.status(404).json({ error: "Customer not found" });
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/email", authenticateAdmin, async (req, res) => {
+    try {
+      const user = (req as { user?: { id?: string } }).user;
+      const result = await sendAdminEmails({
+        to: req.body?.to,
+        subject: req.body?.subject,
+        message: req.body?.message,
+        rateLimitKey: String(user?.id ?? "admin"),
+      });
+      if (result.status === 200) {
+        return res.json({ sent: result.sent, failed: result.failed });
+      }
+      if (result.status === 429) res.set("Retry-After", "60");
+      const body: { error: string; sent?: number; failed?: number } = { error: result.error };
+      if (result.sent != null) body.sent = result.sent;
+      if (result.failed != null) body.failed = result.failed;
+      return res.status(result.status).json(body);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
