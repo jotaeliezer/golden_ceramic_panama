@@ -13,7 +13,7 @@ export interface Order {
   id: string;
   customer_email: string;
   total_amount: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'canceled';
   shipping_address: string;
   created_at: string;
 }

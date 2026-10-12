@@ -1,6 +1,55 @@
 import { useEffect, useState } from "react";
 import { OrderWithItems } from "../../types";
 
+const ORDER_STATUS_OPTIONS = [
+  { value: "pending", label: "Pending" },
+  { value: "paid", label: "Paid" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "canceled", label: "Canceled" },
+] as const;
+
+function statusChoices(status: string) {
+  if (ORDER_STATUS_OPTIONS.some((option) => option.value === status)) {
+    return ORDER_STATUS_OPTIONS;
+  }
+  return [...ORDER_STATUS_OPTIONS, { value: status, label: status }];
+}
+
+function OrderStatusField({
+  status,
+  onChange,
+  className,
+  fieldClassName = "",
+}: {
+  status: string;
+  onChange: (status: string) => void;
+  className: string;
+  fieldClassName?: string;
+}) {
+  return (
+    <div className={`flex flex-wrap items-center gap-2 ${fieldClassName}`}>
+      {status === "paid" && (
+        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+          Paid
+        </span>
+      )}
+      <select
+        value={status}
+        onChange={(event) => onChange(event.target.value)}
+        className={className}
+      >
+        {statusChoices(status).map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,16 +106,12 @@ export default function AdminDashboard() {
               </div>
               <label className="block text-xs font-medium uppercase tracking-wider text-gray-500">
                 Status
-                <select
-                  value={order.status}
-                  onChange={(e) => updateStatus(order.id, e.target.value)}
-                  className="mt-1 block w-full border-gray-300 rounded-md text-sm text-gray-900 shadow-sm focus:border-gold focus:ring-gold"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                </select>
+                <OrderStatusField
+                  status={order.status}
+                  onChange={(status) => updateStatus(order.id, status)}
+                  fieldClassName="mt-1 w-full"
+                  className="block min-w-0 flex-1 border-gray-300 rounded-md text-sm text-gray-900 shadow-sm focus:border-gold focus:ring-gold"
+                />
               </label>
             </article>
           ))}
@@ -97,16 +142,11 @@ export default function AdminDashboard() {
                     ${order.total_amount.toFixed(2)}
                   </td>
                   <td className="px-3 py-4 sm:px-6 text-sm align-top">
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateStatus(order.id, e.target.value)}
+                    <OrderStatusField
+                      status={order.status}
+                      onChange={(status) => updateStatus(order.id, status)}
                       className="max-w-full border-gray-300 rounded-md text-sm shadow-sm focus:border-gold focus:ring-gold"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
+                    />
                   </td>
                 </tr>
               ))}
