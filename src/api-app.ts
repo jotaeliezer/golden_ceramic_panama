@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
-import { sql } from "./db.js";
+import { markOrderPaidAndLowerStock, markPendingOrderCanceled, sql } from "./db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-default-key-golden-ceramic";
 
@@ -76,11 +76,91 @@ function restoreVercelApiPath(req: express.Request, _res: express.Response, next
   next();
 }
 
+function orderIdFromCheckoutSession(session: Stripe.Checkout.Session): string | null {
+  const fromMetadata = session.metadata?.orderId?.trim();
+  if (fromMetadata) return fromMetadata;
+  const fromReference = session.client_reference_id?.trim();
+  if (fromReference) return fromReference;
+  return null;
+}
+
 export function createApp(): express.Express {
   const app = express();
 
   app.set("trust proxy", 1);
   app.use(restoreVercelApiPath);
+
+  // Raw body required for signature verification. Must run before express.json().
+  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    const signature = req.headers["stripe-signature"];
+    if (!signature || (!Buffer.isBuffer(req.body) && typeof req.body !== "string")) {
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+    if (!webhookSecret) {
+      console.warn("STRIPE_WEBHOOK_SECRET is not set. Refusing the webhook.");
+      return res.status(500).json({ error: "Webhook secret is not configured" });
+    }
+
+    let stripe: Stripe;
+    try {
+      stripe = getStripe();
+    } catch (err: any) {
+      console.warn(err.message);
+      return res.status(500).json({ error: "Stripe is not configured" });
+    }
+
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+    } catch {
+      console.warn("Stripe webhook signature verification failed.");
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    try {
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.payment_status === "paid") {
+          const orderId = orderIdFromCheckoutSession(session);
+          if (!orderId) {
+            console.warn("checkout.session.completed had no metadata.orderId or client_reference_id.");
+          } else {
+            const result = await markOrderPaidAndLowerStock(orderId);
+            if (result === "paid") {
+              console.log(`Order ${orderId} marked paid. Stock lowered.`);
+            } else if (result === "already_paid") {
+              console.log(`Order ${orderId} is already paid. Stock left unchanged.`);
+            } else {
+              console.warn(`No order found for ${orderId}. Stock left unchanged.`);
+            }
+          }
+        }
+      } else if (event.type === "checkout.session.expired") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId = orderIdFromCheckoutSession(session);
+        if (!orderId) {
+          console.warn("checkout.session.expired had no metadata.orderId or client_reference_id.");
+        } else {
+          const result = await markPendingOrderCanceled(orderId);
+          if (result === "canceled") {
+            console.log(`Order ${orderId} marked canceled. Stock unchanged.`);
+          } else if (result === "missing") {
+            console.warn(`No order found for expired session ${orderId}.`);
+          } else {
+            console.log(`Order ${orderId} was not pending. Expired event left it unchanged.`);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn("Stripe webhook failed while updating the order.", err?.message ?? err);
+      return res.status(500).json({ error: "Webhook handler failed" });
+    }
+
+    return res.status(200).json({ received: true });
+  });
+
   app.use(express.json());
   app.use(cors());
 
@@ -153,9 +233,10 @@ export function createApp(): express.Express {
           processedItems.push({ productId: item.id, quantity: item.quantity, price });
         }
 
+        // Orders start pending. Stock is checked above and lowered only after Stripe confirms payment.
         await tx`
-          INSERT INTO orders (id, customer_email, total_amount, shipping_address)
-          VALUES (${orderId}, ${customerEmail}, ${totalAmount}, ${shippingAddress})
+          INSERT INTO orders (id, customer_email, total_amount, shipping_address, status)
+          VALUES (${orderId}, ${customerEmail}, ${totalAmount}, ${shippingAddress}, ${"pending"})
         `;
 
         for (let index = 0; index < processedItems.length; index++) {
@@ -163,9 +244,6 @@ export function createApp(): express.Express {
           await tx`
             INSERT INTO order_items (id, order_id, product_id, quantity, price)
             VALUES (${`${orderId}_item_${index}`}, ${orderId}, ${pi.productId}, ${pi.quantity}, ${pi.price})
-          `;
-          await tx`
-            UPDATE products SET stock = stock - ${pi.quantity} WHERE id = ${pi.productId}
           `;
         }
 
@@ -183,6 +261,8 @@ export function createApp(): express.Express {
           success_url: `${origin}?success=true&orderId=${orderId}`,
           cancel_url: `${origin}/cart?canceled=true`,
           customer_email: customerEmail,
+          client_reference_id: orderId,
+          metadata: { orderId },
         });
         checkoutUrl = session.url;
       } catch (e: any) {
