@@ -14,6 +14,7 @@ import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import ThankYou from "./pages/ThankYou";
 import About from "./pages/About";
 
 // Admin pages
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="product/:id" element={<ProductDetail />} />
             <Route path="cart" element={<Cart />} />
             <Route path="checkout" element={<Checkout />} />
+            <Route path="gracias" element={<ThankYou />} />
           </Route>
           
           <Route path="/admin">

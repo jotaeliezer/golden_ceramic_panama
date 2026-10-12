@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import Stripe from "stripe";
 import { markOrderPaidAndLowerStock, markPendingOrderCanceled, sql } from "./db.js";
 
@@ -195,6 +196,16 @@ export function createApp(): express.Express {
     }
   });
 
+  app.get("/api/orders/:id/status", async (req, res) => {
+    try {
+      const [order] = await sql`SELECT status FROM orders WHERE id = ${req.params.id}`;
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      res.json({ status: order.status });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/checkout", async (req, res) => {
     const { items, customerEmail, shippingAddress } = req.body;
 
@@ -258,7 +269,7 @@ export function createApp(): express.Express {
           payment_method_types: ["card"],
           line_items: lineItems,
           mode: "payment",
-          success_url: `${origin}?success=true&orderId=${orderId}`,
+          success_url: `${origin}/gracias?orderId=${encodeURIComponent(orderId)}`,
           cancel_url: `${origin}/cart?canceled=true`,
           customer_email: customerEmail,
           client_reference_id: orderId,
@@ -276,17 +287,25 @@ export function createApp(): express.Express {
   });
 
   app.post("/api/auth/login", async (req, res) => {
-    const { email, password } = req.body;
+    const email = typeof req.body?.email === "string" ? req.body.email : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+    if (!email || !password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
     try {
       const [user] = await sql`
-        SELECT id FROM admin_users WHERE email = ${email} AND password = ${password}
+        SELECT id, password FROM admin_users WHERE email = ${email}
       `;
-      if (user) {
-        const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "24h" });
-        res.json({ token });
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
+      // Plaintext rows are refused until they are replaced with a bcrypt hash.
+      const stored = user?.password;
+      const hash = typeof stored === "string" && /^\$2[aby]\$\d{2}\$/.test(stored) ? stored : null;
+      const matches = hash ? await bcrypt.compare(password, hash) : false;
+      if (!user || !matches) {
+        return res.status(401).json({ error: "Invalid credentials" });
       }
+      const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "24h" });
+      res.json({ token });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

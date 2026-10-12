@@ -88,24 +88,14 @@ export async function markPendingOrderCanceled(orderId: string): Promise<CancelC
 }
 
 /**
- * Local development only. Applies db/migrations/001_init.sql and the demo
- * admin row. Never runs on Vercel, and never on a request.
+ * Local development only. Applies db/migrations/001_init.sql.
+ * Does not create an admin user. Never runs on Vercel, and never on a request.
  */
 export async function bootstrapLocalSchema(): Promise<void> {
   if (process.env.VERCEL) return;
 
   const migrationPath = join(process.cwd(), "db/migrations/001_init.sql");
   await sql.unsafe(readFileSync(migrationPath, "utf8"));
-
-  const existing = await sql`
-    SELECT 1 FROM admin_users WHERE email = ${"admin@goldenceramic.com"}
-  `;
-  if (existing.length === 0) {
-    await sql`
-      INSERT INTO admin_users (id, email, password)
-      VALUES ('admin-1', 'admin@goldenceramic.com', 'admin123')
-    `;
-  }
 }
 
 export default sql;
