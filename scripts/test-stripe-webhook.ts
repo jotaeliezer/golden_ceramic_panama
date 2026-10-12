@@ -97,6 +97,11 @@ async function waitForServer(child: ChildProcess): Promise<string> {
     let settled = false;
     const onData = (chunk: Buffer) => {
       logs += chunk.toString();
+      if (!settled && logs.includes("Server running")) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(logs);
+      }
     };
     child.stdout?.on("data", onData);
     child.stderr?.on("data", onData);
