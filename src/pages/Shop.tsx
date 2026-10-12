@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Product } from "../types";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Shop() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,13 +55,13 @@ export default function Shop() {
               <div className="aspect-[4/5] bg-ivory-focus overflow-hidden mb-5">
                 <img 
                   src={p.imageUrl} 
-                  alt={p.name}
+                  alt={catalog.name(p)}
                   className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
               </div>
               <div className="flex flex-col mt-auto">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1.5">{p.category}</p>
-                <h3 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal mb-1">{p.name}</h3>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1.5">{catalog.category(p.category)}</p>
+                <h3 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal mb-1">{catalog.name(p)}</h3>
                 <p className="text-[10px] font-medium text-charcoal/60">${p.price.toFixed(2)} USD</p>
               </div>
             </Link>

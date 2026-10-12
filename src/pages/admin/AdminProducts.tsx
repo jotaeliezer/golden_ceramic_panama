@@ -7,9 +7,18 @@ export default function AdminProducts() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState({
-    name: "", description: "", price: "", imageUrl: "", category: "", stock: ""
-  });
+  const emptyForm = {
+    name: "",
+    description: "",
+    name_en: "",
+    description_en: "",
+    price: "",
+    imageUrl: "",
+    category: "",
+    stock: "",
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
 
   const fetchProducts = () => {
     fetch('/api/products')
@@ -45,7 +54,9 @@ export default function AdminProducts() {
     setCurrentId(p.id);
     setFormData({
       name: p.name,
-      description: p.description,
+      description: p.description ?? "",
+      name_en: p.name_en ?? "",
+      description_en: p.description_en ?? "",
       price: p.price.toString(),
       imageUrl: p.imageUrl,
       category: p.category,
@@ -65,7 +76,7 @@ export default function AdminProducts() {
 
   const startNew = () => {
     setCurrentId(null);
-    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "", stock: "" });
+    setFormData(emptyForm);
     setIsEditing(true);
   };
 
@@ -77,6 +88,11 @@ export default function AdminProducts() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
             <input required type="text" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">English name <span className="font-normal text-gray-400">(optional)</span></label>
+            <input type="text" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})} />
+            <p className="mt-1 text-xs text-gray-500">Shown when the shop language is English. Leave blank to keep the Spanish name.</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Category</label>
@@ -114,6 +130,11 @@ export default function AdminProducts() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Description</label>
             <textarea required rows={4} className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">English description <span className="font-normal text-gray-400">(optional)</span></label>
+            <textarea rows={4} className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} />
+            <p className="mt-1 text-xs text-gray-500">Shown when the shop language is English. Leave blank to keep the Spanish description.</p>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Cancel</button>
