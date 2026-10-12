@@ -140,8 +140,7 @@ export default function AdminEmailModal({
             </label>
             {error && (
               <p role="alert" className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
-                {error === "email not configured" && " Nothing was sent."}
+                {error === "email not configured" ? "email not configured. Nothing was sent." : error}
               </p>
             )}
             <div className="flex flex-wrap gap-3">
