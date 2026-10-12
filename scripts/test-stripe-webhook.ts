@@ -15,6 +15,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import bcrypt from "bcryptjs";
 import postgres from "postgres";
 import Stripe from "stripe";
 
@@ -120,14 +121,27 @@ async function getStock(productId: string): Promise<number> {
   return product.stock;
 }
 
-async function login(): Promise<string> {
+async function ensureAdmin(databaseUrl: string): Promise<{ email: string; password: string }> {
+  const email = `admin-${Date.now().toString(36)}@example.com`;
+  const password = `pw-${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+  const hash = await bcrypt.hash(password, 10);
+  const db = postgres(databaseUrl, { ssl: false, max: 1, prepare: false });
+  try {
+    await db`
+      INSERT INTO admin_users (id, email, password)
+      VALUES (${`admin_${Date.now().toString(36)}`}, ${email}, ${hash})
+    `;
+  } finally {
+    await db.end({ timeout: 5 });
+  }
+  return { email, password };
+}
+
+async function login(email: string, password: string): Promise<string> {
   const res = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: "admin@goldenceramic.com",
-      password: "admin123",
-    }),
+    body: JSON.stringify({ email, password }),
   });
   const body = (await res.json()) as { token?: string };
   if (!body.token) throw new Error(`Admin login failed: ${res.status}`);
@@ -237,7 +251,8 @@ async function main(): Promise<void> {
   try {
     await waitForServer(child);
     await insertProducts(databaseUrl);
-    const token = await login();
+    const admin = await ensureAdmin(databaseUrl);
+    const token = await login(admin.email, admin.password);
 
     const stockBefore = await getStock("p3");
     const placed = await checkout("p3", 2);
