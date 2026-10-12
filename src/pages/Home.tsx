@@ -45,7 +45,7 @@ export default function Home() {
           </motion.p>
           <Link 
             to="/shop" 
-            className="inline-block border border-charcoal px-10 py-4 text-xs uppercase tracking-[0.3em] font-semibold hover:bg-charcoal hover:text-white transition-colors"
+            className="inline-block border border-charcoal px-10 py-4 text-xs uppercase tracking-[0.3em] font-semibold hover:bg-ink hover:text-white transition-colors"
           >
             {t("home.viewCatalog")}
           </Link>
@@ -57,12 +57,12 @@ export default function Home() {
             <img 
               src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=1200&auto=format&fit=crop" 
               alt={t("home.heroAlt")} 
-              className="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-1000 hover:scale-105"
+              className="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-1000 hover:scale-105 dark:mix-blend-normal"
             />
           </div>
           
           {/* Floating Overlay Label */}
-          <div className="hidden lg:block absolute -bottom-8 -left-12 bg-charcoal text-white p-6 w-64 shadow-xl z-20">
+          <div className="hidden lg:block absolute -bottom-8 -left-12 bg-ink text-white p-6 w-64 shadow-xl z-20">
             <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">{t("home.material")}</p>
             <p className="text-sm italic font-serif">{t("home.materialQuote")}</p>
           </div>
@@ -97,7 +97,7 @@ export default function Home() {
                   <img 
                     src={p.imageUrl} 
                     alt={p.name}
-                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out dark:mix-blend-normal"
                   />
                 </div>
                 <div className="flex flex-col">

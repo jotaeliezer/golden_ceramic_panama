@@ -40,10 +40,10 @@ export default function About() {
         <img 
           src="https://images.unsplash.com/photo-1565193566173-7a0cb3d90403?q=80&w=1200&auto=format&fit=crop" 
           alt={t("about.imageAlt")} 
-          className="w-full h-[500px] object-cover mix-blend-multiply opacity-90"
+          className="w-full h-[500px] object-cover mix-blend-multiply opacity-90 dark:mix-blend-normal"
         />
         {/* Floating Label */}
-        <div className="absolute -bottom-6 -right-6 bg-charcoal text-white p-6 w-64 shadow-xl z-20 hidden md:block text-left">
+        <div className="absolute -bottom-6 -right-6 bg-ink text-white p-6 w-64 shadow-xl z-20 hidden md:block text-left">
           <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">{t("about.location")}</p>
           <p className="text-sm italic font-serif">{t("about.locationQuote")}</p>
         </div>

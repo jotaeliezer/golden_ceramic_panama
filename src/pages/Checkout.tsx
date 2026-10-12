@@ -108,7 +108,7 @@ export default function Checkout() {
             <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full md:w-auto border border-charcoal bg-charcoal hover:bg-transparent hover:text-charcoal text-white px-10 py-4 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors disabled:opacity-50"
+                className="w-full md:w-auto border border-charcoal bg-ink hover:bg-transparent hover:text-charcoal text-white px-10 py-4 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors disabled:opacity-50"
                 >
                 {loading ? t("checkout.processing") : t("checkout.placeOrder")}
             </button>

@@ -54,7 +54,7 @@ export default function Shop() {
                 <img 
                   src={p.imageUrl} 
                   alt={p.name}
-                  className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out dark:mix-blend-normal"
                 />
               </div>
               <div className="flex flex-col mt-auto">

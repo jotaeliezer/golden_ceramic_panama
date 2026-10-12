@@ -110,7 +110,7 @@ export default function ThankYou() {
 
       <Link
         to="/shop"
-        className="mt-8 md:mt-12 inline-flex w-full sm:w-auto items-center justify-center border border-charcoal px-8 sm:px-10 py-4 text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-semibold hover:bg-charcoal hover:text-white transition-colors"
+        className="mt-8 md:mt-12 inline-flex w-full sm:w-auto items-center justify-center border border-charcoal px-8 sm:px-10 py-4 text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-semibold hover:bg-ink hover:text-white transition-colors"
       >
         {t("thanks.catalog")}
       </Link>

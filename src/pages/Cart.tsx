@@ -28,7 +28,7 @@ export default function Cart() {
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 sm:gap-8 border-b border-charcoal/10 pb-8 items-center">
               <div className="w-32 h-32 bg-ivory-focus flex-shrink-0">
-                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
+                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
@@ -45,7 +45,7 @@ export default function Cart() {
                       type="button"
                       aria-label={t("cart.decrease", { name: item.name })}
                       onClick={() => updateQuantity(item.id, item.cartQuantity - 1)}
-                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-ink hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     >
                       -
                     </button>
@@ -54,7 +54,7 @@ export default function Cart() {
                       type="button"
                       aria-label={t("cart.increase", { name: item.name })}
                       onClick={() => updateQuantity(item.id, item.cartQuantity + 1)}
-                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                      className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-ink hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     >
                       +
                     </button>
@@ -92,7 +92,7 @@ export default function Cart() {
             </div>
             <Link 
               to="/checkout" 
-              className="block w-full text-center border border-charcoal bg-transparent hover:bg-charcoal hover:text-white text-charcoal py-4 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors"
+              className="block w-full text-center border border-charcoal bg-transparent hover:bg-ink hover:text-white text-charcoal py-4 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors"
             >
               {t("cart.proceed")}
             </Link>

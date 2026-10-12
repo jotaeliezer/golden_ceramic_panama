@@ -39,7 +39,7 @@ export default function ProductDetail() {
         <img 
           src={product.imageUrl} 
           alt={product.name} 
-          className="w-full aspect-[4/5] object-cover shadow-lg mix-blend-multiply"
+          className="w-full aspect-[4/5] object-cover shadow-lg mix-blend-multiply dark:mix-blend-normal"
         />
       </motion.div>
       
@@ -64,7 +64,7 @@ export default function ProductDetail() {
               type="button"
               aria-label={t("product.decrease")}
               onClick={() => setQty(Math.max(1, qty - 1))}
-              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-ink hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >-</button>
             <input 
               type="number" 
@@ -78,13 +78,13 @@ export default function ProductDetail() {
               type="button"
               aria-label={t("product.increase")}
               onClick={() => setQty(qty + 1)}
-              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="min-h-11 min-w-11 w-11 h-12 flex justify-center items-center hover:bg-ink hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >+</button>
           </div>
           
           <button 
             onClick={handleAdd}
-            className="flex-1 border border-charcoal bg-transparent hover:bg-charcoal hover:text-white text-charcoal h-12 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors"
+            className="flex-1 border border-charcoal bg-transparent hover:bg-ink hover:text-white text-charcoal h-12 uppercase tracking-[0.3em] text-[10px] font-bold transition-colors"
           >
             {added ? t("product.added") : t("product.add")}
           </button>
