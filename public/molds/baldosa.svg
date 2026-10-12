@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img">
   <rect width="800" height="1000" fill="#F2F0E6"/>
-  
-    <g fill="none" stroke="#2D2D2D" stroke-width="10">
-      <rect x="170" y="220" width="460" height="560"/>
-      <polygon points="400,280 470,400 600,430 500,530 530,680 400,610 270,680 300,530 200,430 330,400"/>
-    </g>
-    <circle cx="400" cy="500" r="28" fill="#C9A24A"/>
-  
+  <g fill="none" stroke="#2D2D2D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="170" y="270" width="460" height="460" rx="16"/>
+    <rect x="194" y="294" width="412" height="412" rx="8"/>
+    <rect x="236" y="336" width="328" height="328"/>
+    <polygon points="400,380 419.1,453.8 484.9,415.1 446.2,480.9 520,500 446.2,519.1 484.9,584.9 419.1,546.2 400,620 380.9,546.2 315.1,584.9 353.8,519.1 280,500 353.8,480.9 315.1,415.1 380.9,453.8"/>
+    <circle cx="400" cy="500" r="18"/>
+  </g>
+  <path d="M400 270 V730" fill="none" stroke="#C9A24A" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#F2F0E6" stroke="#2D2D2D" stroke-width="5">
+    <circle cx="400" cy="315" r="11"/>
+    <circle cx="400" cy="685" r="11"/>
+  </g>
 </svg>

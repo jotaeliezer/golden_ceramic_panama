@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img">
   <rect width="800" height="1000" fill="#F2F0E6"/>
-  
-    <g fill="none" stroke="#2D2D2D" stroke-width="10" stroke-linejoin="round">
-      <path d="M80 420 H720 V470 H640 V520 H560 V580 H200 V520 H140 V470 H80 Z"/>
-      <path d="M220 580 V700 M300 580 V700 M380 580 V700 M460 580 V700 M540 580 V700"/>
-    </g>
-    <rect x="80" y="390" width="640" height="18" fill="#C9A24A"/>
-  
+  <g fill="none" stroke="#2D2D2D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="96" y="355" width="608" height="290" rx="16"/>
+    <rect x="120" y="379" width="560" height="242" rx="8"/>
+    <rect x="168" y="420" width="464" height="20"/>
+    <rect x="168" y="448" width="464" height="36"/>
+    <rect x="186" y="492" width="32" height="34"/>
+    <rect x="240" y="492" width="32" height="34"/>
+    <rect x="294" y="492" width="32" height="34"/>
+    <rect x="348" y="492" width="32" height="34"/>
+    <rect x="402" y="492" width="32" height="34"/>
+    <rect x="456" y="492" width="32" height="34"/>
+    <rect x="510" y="492" width="32" height="34"/>
+    <rect x="564" y="492" width="32" height="34"/>
+    <rect x="168" y="534" width="464" height="16"/>
+  </g>
+  <path d="M96 509 H704" fill="none" stroke="#C9A24A" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#F2F0E6" stroke="#2D2D2D" stroke-width="5">
+    <circle cx="144" cy="509" r="11"/>
+    <circle cx="656" cy="509" r="11"/>
+  </g>
 </svg>
