@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img">
+  <rect width="800" height="1000" fill="#F2F0E6"/>
+  
+    <g fill="none" stroke="#2D2D2D" stroke-width="14">
+      <rect x="140" y="160" width="520" height="680"/>
+      <rect x="210" y="230" width="380" height="540"/>
+    </g>
+    <g fill="#C9A24A">
+      <circle cx="175" cy="195" r="16"/>
+      <circle cx="625" cy="195" r="16"/>
+      <circle cx="175" cy="805" r="16"/>
+      <circle cx="625" cy="805" r="16"/>
+    </g>
+  
+</svg>

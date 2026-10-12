@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img">
+  <rect width="800" height="1000" fill="#F2F0E6"/>
+  
+    <g fill="none" stroke="#2D2D2D" stroke-width="10">
+      <rect x="160" y="140" width="480" height="720" rx="16"/>
+      <path d="M220 520 Q400 300 580 520 Q400 620 220 520 Z"/>
+      <path d="M400 520 V760"/>
+      <circle cx="400" cy="400" r="46"/>
+      <path d="M250 780 H550"/>
+    </g>
+    <circle cx="400" cy="400" r="12" fill="#C9A24A"/>
+  
+</svg>
