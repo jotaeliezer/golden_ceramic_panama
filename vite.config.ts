@@ -17,8 +17,19 @@ export default defineConfig(({mode}) => {
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modify - file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
+      watch: {
+        // Saving a capture writes SQLite and uploads/. Ignore them so Vite does not reload the page.
+        ignored: [
+          "**/.git/**",
+          "**/node_modules/**",
+          "**/test-results/**",
+          "**/sqlite.db",
+          "**/sqlite.db-*",
+          "**/uploads/**",
+        ],
+      },
     },
   };
 });

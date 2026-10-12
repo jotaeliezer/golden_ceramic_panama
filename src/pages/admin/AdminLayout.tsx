@@ -1,5 +1,5 @@
 import { Outlet, Navigate, NavLink } from "react-router-dom";
-import { Package, ShoppingBag, LogOut } from "lucide-react";
+import { Camera, Package, ShoppingBag, LogOut } from "lucide-react";
 
 export default function AdminLayout() {
   const token = localStorage.getItem("adminToken");
@@ -19,8 +19,8 @@ export default function AdminLayout() {
     }`;
 
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex min-h-11 items-center justify-center gap-1.5 px-2 text-xs font-medium transition-colors ${
-      isActive ? "text-gold border-b-2 border-gold" : "text-gray-300 hover:text-white"
+    `flex min-h-11 items-center justify-center gap-1 px-1 text-[11px] font-medium leading-tight transition-colors ${
+      isActive ? "text-gold border-b-2 border-gold" : "border-b-2 border-transparent text-gray-300 hover:text-white"
     }`;
 
   return (
@@ -39,6 +39,10 @@ export default function AdminLayout() {
             <Package className="w-5 h-5 mr-3" />
             Products
           </NavLink>
+          <NavLink to="/admin/capture" className={desktopLinkClass}>
+            <Camera className="w-5 h-5 mr-3" />
+            Capture
+          </NavLink>
         </nav>
         <div className="p-4 mt-auto">
           <button 
@@ -56,19 +60,23 @@ export default function AdminLayout() {
           <div className="px-4 pt-4 pb-3">
             <h2 className="font-serif text-lg text-gold">Admin Panel</h2>
           </div>
-          <nav aria-label="Admin" className="grid grid-cols-3 border-t border-white/10">
+          <nav aria-label="Admin" className="grid grid-cols-4 border-t border-white/10">
             <NavLink to="/admin" end className={mobileLinkClass}>
-              <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+              <ShoppingBag className="w-4 h-4 shrink-0" aria-hidden="true" />
               Orders
             </NavLink>
             <NavLink to="/admin/products" className={mobileLinkClass}>
-              <Package className="w-4 h-4" aria-hidden="true" />
+              <Package className="w-4 h-4 shrink-0" aria-hidden="true" />
               Products
+            </NavLink>
+            <NavLink to="/admin/capture" className={mobileLinkClass}>
+              <Camera className="w-4 h-4 shrink-0" aria-hidden="true" />
+              Capture
             </NavLink>
             <button
               type="button"
               onClick={handleLogout}
-              className="flex min-h-11 items-center justify-center gap-1.5 px-2 text-xs font-medium text-gray-300 hover:text-white"
+              className="flex min-h-11 items-center justify-center gap-1 border-b-2 border-transparent px-1 text-[11px] font-medium leading-tight text-gray-300 hover:text-white"
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
               Logout

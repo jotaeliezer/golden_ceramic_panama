@@ -1,11 +1,20 @@
 import "dotenv/config";
 import express from "express";
+import type { ErrorRequestHandler } from "express";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
+import fs from "fs";
 import path from "path";
+import { randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
 import db from "./src/db.js";
+import { defaultMoldName } from "./src/lib/moldName.js";
 import Stripe from "stripe";
+
+// Temporary local mold photos until the Supabase migration. Never commit this folder.
+const uploadsDir = path.join(process.cwd(), "uploads");
+const CAPTURE_JSON_LIMIT = "6mb";
+const MAX_JPEG_BYTES = 4 * 1024 * 1024;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-default-key-golden-ceramic';
 
@@ -37,12 +46,134 @@ function getStripe(): Stripe {
   return stripeClient;
 }
 
+class CaptureValidationError extends Error {}
+
+type NewProduct = {
+  id?: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  stock: number;
+};
+
+function insertProduct(product: NewProduct): string {
+  const id = product.id ?? `p_${Date.now()}`;
+  db.prepare(
+    "INSERT INTO products (id, name, description, price, imageUrl, category, stock) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(
+    id,
+    product.name,
+    product.description,
+    product.price,
+    product.imageUrl,
+    product.category,
+    product.stock
+  );
+  return id;
+}
+
+function parseCaptureName(value: unknown): string {
+  if (value == null || value === "") return defaultMoldName();
+  if (typeof value !== "string") throw new CaptureValidationError("Name must be text.");
+  const name = value.replace(/[\u0000-\u001F\u007F]/g, "").replace(/\s+/g, " ").trim();
+  if (!name) return defaultMoldName();
+  if (name.length > 120) throw new CaptureValidationError("Name must be 120 characters or fewer.");
+  return name;
+}
+
+function parseCaptureQuantity(value: unknown): number {
+  if (typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 1_000_000) {
+    return value;
+  }
+  if (typeof value === "string" && /^(0|[1-9]\d*)$/.test(value)) {
+    const quantity = Number(value);
+    if (quantity <= 1_000_000) return quantity;
+  }
+  throw new CaptureValidationError("Enter a whole number of pieces, 0 or more.");
+}
+
+function decodeJpegDataUrl(value: unknown): Buffer {
+  if (typeof value !== "string" || !value.startsWith("data:image/jpeg;base64,")) {
+    throw new CaptureValidationError("Photo must be a JPEG.");
+  }
+  const encoded = value.slice("data:image/jpeg;base64,".length).replace(/\s/g, "");
+  if (!encoded || encoded.length > 6 * 1024 * 1024) {
+    throw new CaptureValidationError("Photo is too large.");
+  }
+  const buffer = Buffer.from(encoded, "base64");
+  if (
+    buffer.length < 32 ||
+    buffer.length > MAX_JPEG_BYTES ||
+    buffer[0] !== 0xff ||
+    buffer[1] !== 0xd8 ||
+    buffer[2] !== 0xff
+  ) {
+    throw new CaptureValidationError(buffer.length > MAX_JPEG_BYTES ? "Photo is too large." : "Photo must be a JPEG.");
+  }
+  return buffer;
+}
+
+function saveCapturedMold(body: unknown): { id: string; name: string; stock: number; imageUrl: string } {
+  if (!body || typeof body !== "object") throw new CaptureValidationError("Missing capture details.");
+  const record = body as { name?: unknown; quantity?: unknown; imageDataUrl?: unknown };
+  const name = parseCaptureName(record.name);
+  const stock = parseCaptureQuantity(record.quantity);
+  const jpeg = decodeJpegDataUrl(record.imageDataUrl);
+
+  const id = `p_${Date.now().toString(36)}_${randomBytes(4).toString("hex")}`;
+  const filename = `${id}.jpg`;
+  const dest = path.join(uploadsDir, filename);
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  fs.writeFileSync(dest, jpeg, { flag: "wx" });
+
+  const imageUrl = `/uploads/${filename}`;
+  try {
+    insertProduct({
+      id,
+      name,
+      description: "Captured on the shop floor. Temporary local catalog entry until the Supabase migration.",
+      price: 0,
+      imageUrl,
+      category: "Molds",
+      stock,
+    });
+  } catch (error) {
+    fs.rmSync(dest, { force: true });
+    throw error;
+  }
+
+  return { id, name, stock, imageUrl };
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  fs.mkdirSync(uploadsDir, { recursive: true });
+
+  const parseJson = express.json({ limit: "100kb" });
+  const parseCaptureJson = express.json({ limit: CAPTURE_JSON_LIMIT });
+  app.use((req, res, next) => {
+    if (req.method === "POST" && req.path === "/api/admin/capture") {
+      parseCaptureJson(req, res, next);
+      return;
+    }
+    parseJson(req, res, next);
+  });
+
+  const handleJsonError: ErrorRequestHandler = (err, _req, res, next) => {
+    if (err && typeof err === "object" && "type" in err && err.type === "entity.too.large") {
+      res.status(413).json({ error: "Photo is too large. Try a smaller image." });
+      return;
+    }
+    next(err);
+  };
+  app.use(handleJsonError);
+
   app.use(cors());
+  app.use("/uploads", express.static(uploadsDir, { index: false, dotfiles: "deny", fallthrough: false }));
 
   // === Authentication Middleware ===
 
@@ -177,13 +308,31 @@ async function startServer() {
   app.post("/api/products", authenticateAdmin, (req, res) => {
     const { name, description, price, imageUrl, category, stock } = req.body;
     try {
-      const id = 'p_' + Date.now();
-      db.prepare("INSERT INTO products (id, name, description, price, imageUrl, category, stock) VALUES (?, ?, ?, ?, ?, ?, ?)").run(
-        id, name, description, parseFloat(price), imageUrl, category, parseInt(stock)
-      );
+      const id = insertProduct({
+        name,
+        description,
+        price: parseFloat(price),
+        imageUrl,
+        category,
+        stock: parseInt(stock),
+      });
       res.json({ id });
     } catch(err: any) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: shop-floor photo capture. Temporary local file + the same product insert as POST /api/products.
+  app.post("/api/admin/capture", authenticateAdmin, (req, res) => {
+    try {
+      res.status(201).json(saveCapturedMold(req.body));
+    } catch (err: any) {
+      if (err instanceof CaptureValidationError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      console.error("Capture save failed", err);
+      res.status(500).json({ error: "Could not save this piece." });
     }
   });
 
