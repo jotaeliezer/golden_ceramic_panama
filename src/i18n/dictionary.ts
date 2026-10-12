@@ -3,7 +3,7 @@ export type Locale = "es" | "en";
 export const LOCALE_STORAGE_KEY = "gcp-locale";
 
 const es = {
-  "meta.title": "Golden Ceramic Panamá",
+  "meta.title": "Golden Ceramic Panamá | Moldes de cerámica",
 
   "language.label": "Idioma",
   "language.spanish": "Español",
@@ -105,7 +105,7 @@ const es = {
 export type MessageKey = keyof typeof es;
 
 const en: { [K in MessageKey]: string } = {
-  "meta.title": "My Google AI Studio App",
+  "meta.title": "Golden Ceramic Panama | Ceramic Molds",
 
   "language.label": "Language",
   "language.spanish": "Spanish",
