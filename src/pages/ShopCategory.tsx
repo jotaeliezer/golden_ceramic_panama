@@ -60,7 +60,7 @@ export default function ShopCategory() {
         )}
         <Link
           to="/shop"
-          className="mt-8 inline-flex min-h-11 items-center gap-2 border border-charcoal px-5 text-[11px] uppercase tracking-[0.18em] font-semibold text-charcoal hover:bg-charcoal hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="mt-8 inline-flex min-h-11 items-center gap-2 border border-charcoal px-5 text-[11px] uppercase tracking-[0.18em] font-semibold text-charcoal hover:bg-ink hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           <ArrowLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
           {t("shop.backButton")}
@@ -95,7 +95,7 @@ export default function ShopCategory() {
                   <img
                     src={p.imageUrl}
                     alt={catalog.name(p)}
-                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out dark:mix-blend-normal"
                   />
                 </div>
                 <div className="flex flex-col mt-auto">

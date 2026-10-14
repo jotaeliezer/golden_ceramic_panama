@@ -2,6 +2,18 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Product } from "../../types";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
+const labelClass = "block text-sm font-medium text-gray-700 dark:text-neutral-200";
+const fieldClass =
+  "mt-1 w-full rounded border border-gray-300 bg-white p-2 text-gray-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100";
+const hintClass = "mt-1 text-xs text-gray-500 dark:text-neutral-400";
+const optionalClass = "font-normal text-gray-400 dark:text-neutral-400";
+
+function stockBadgeClass(stock: number) {
+  if (stock > 10) return "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200";
+  if (stock > 0) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-100";
+  return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200";
+}
+
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -82,38 +94,38 @@ export default function AdminProducts() {
 
   if (isEditing) {
     return (
-      <div className="max-w-2xl bg-white p-8 shadow rounded">
+      <div className="max-w-2xl bg-white p-8 shadow rounded dark:bg-neutral-900 dark:text-neutral-100 dark:ring-1 dark:ring-white/10">
         <h2 className="text-2xl font-serif mb-6">{currentId ? "Edit Product" : "New Product"}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input required type="text" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+            <label className={labelClass}>Name</label>
+            <input required type="text" className={fieldClass} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">English name <span className="font-normal text-gray-400">(optional)</span></label>
-            <input type="text" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})} />
-            <p className="mt-1 text-xs text-gray-500">Shown when the shop language is English. Leave blank to keep the Spanish name.</p>
+            <label className={labelClass}>English name <span className={optionalClass}>(optional)</span></label>
+            <input type="text" className={fieldClass} value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})} />
+            <p className={hintClass}>Shown when the shop language is English. Leave blank to keep the Spanish name.</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
-            <input required type="text" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
+            <label className={labelClass}>Category</label>
+            <input required type="text" className={fieldClass} value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Price ($)</label>
-              <input required type="number" step="0.01" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+              <label className={labelClass}>Price ($)</label>
+              <input required type="number" step="0.01" className={fieldClass} value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Stock</label>
-              <input required type="number" className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
+              <label className={labelClass}>Stock</label>
+              <input required type="number" className={fieldClass} value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Product Image</label>
+            <label className={labelClass}>Product Image</label>
             <input 
               type="file" 
               accept="image/*"
-              className="mt-1 w-full p-2 border border-gray-300 rounded" 
+              className={fieldClass}
               onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) {
@@ -128,17 +140,17 @@ export default function AdminProducts() {
             {formData.imageUrl && <img src={formData.imageUrl} className="h-20 mt-2 object-cover" alt="Preview"/>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea required rows={4} className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+            <label className={labelClass}>Description</label>
+            <textarea required rows={4} className={fieldClass} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">English description <span className="font-normal text-gray-400">(optional)</span></label>
-            <textarea rows={4} className="mt-1 w-full p-2 border border-gray-300 rounded" value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} />
-            <p className="mt-1 text-xs text-gray-500">Shown when the shop language is English. Leave blank to keep the Spanish description.</p>
+            <label className={labelClass}>English description <span className={optionalClass}>(optional)</span></label>
+            <textarea rows={4} className={fieldClass} value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} />
+            <p className={hintClass}>Shown when the shop language is English. Leave blank to keep the Spanish description.</p>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-charcoal text-white rounded hover:bg-charcoal-light">Save Product</button>
+            <button type="button" onClick={() => setIsEditing(false)} className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800">Cancel</button>
+            <button type="submit" className="rounded bg-ink px-4 py-2 text-white hover:bg-ink-light dark:ring-1 dark:ring-white/40">Save Product</button>
           </div>
         </form>
       </div>
@@ -149,22 +161,22 @@ export default function AdminProducts() {
     <div>
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h1 className="text-3xl font-serif text-charcoal">Products</h1>
-        <button onClick={startNew} className="flex items-center px-4 py-2 bg-charcoal text-white tracking-widest text-sm font-semibold rounded hover:bg-charcoal-light">
+        <button onClick={startNew} className="flex items-center rounded bg-ink px-4 py-2 text-sm font-semibold tracking-widest text-white hover:bg-ink-light dark:ring-1 dark:ring-white/40">
           <Plus className="w-4 h-4 mr-2" /> Add Product
         </button>
       </div>
 
       <div className="md:hidden space-y-3">
         {products.map(p => (
-          <article key={p.id} className="bg-white shadow rounded-lg p-4">
+          <article key={p.id} className="bg-white shadow rounded-lg p-4 dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
             <div className="flex items-start gap-3 min-w-0">
               <img className="h-12 w-12 rounded-full object-cover shrink-0" src={p.imageUrl} alt="" />
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium text-gray-900 break-words">{p.name}</div>
-                <div className="text-sm text-gray-500 break-words">{p.category}</div>
+                <div className="text-sm font-medium text-gray-900 break-words dark:text-neutral-100">{p.name}</div>
+                <div className="text-sm text-gray-500 break-words dark:text-neutral-300">{p.category}</div>
                 <div className="mt-2 flex items-center justify-between gap-3">
-                  <span className="text-sm text-gray-900">${p.price.toFixed(2)}</span>
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.stock > 10 ? 'bg-green-100 text-green-800' : p.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                  <span className="text-sm text-gray-900 dark:text-neutral-100">${p.price.toFixed(2)}</span>
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stockBadgeClass(p.stock)}`}>
                     {p.stock} in stock
                   </span>
                 </div>
@@ -182,17 +194,17 @@ export default function AdminProducts() {
         ))}
       </div>
 
-      <div className="hidden md:block bg-white shadow overflow-x-auto sm:rounded-lg">
-          <table className="w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="hidden md:block bg-white shadow overflow-x-auto sm:rounded-lg dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+          <table className="w-full divide-y divide-gray-200 dark:divide-neutral-700">
+            <thead className="bg-gray-50 dark:bg-neutral-950">
               <tr>
-                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-3 py-3 sm:px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-neutral-300">Product</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-neutral-300">Price</th>
+                <th className="px-3 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-neutral-300">Stock</th>
+                <th className="px-3 py-3 sm:px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-neutral-300">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 dark:bg-neutral-900 dark:divide-neutral-700">
               {products.map(p => (
                 <tr key={p.id}>
                   <td className="px-3 py-4 sm:px-6 align-top">
@@ -201,14 +213,14 @@ export default function AdminProducts() {
                         <img className="h-10 w-10 rounded-full object-cover" src={p.imageUrl} alt="" />
                       </div>
                       <div className="ml-4 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 break-words">{p.name}</div>
-                        <div className="text-sm text-gray-500 break-words">{p.category}</div>
+                        <div className="text-sm font-medium text-gray-900 break-words dark:text-neutral-100">{p.name}</div>
+                        <div className="text-sm text-gray-500 break-words dark:text-neutral-300">{p.category}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-4 sm:px-6 text-sm text-gray-900 align-top">${p.price.toFixed(2)}</td>
+                  <td className="px-3 py-4 sm:px-6 text-sm text-gray-900 align-top dark:text-neutral-100">${p.price.toFixed(2)}</td>
                   <td className="px-3 py-4 sm:px-6 align-top">
-          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.stock > 10 ? 'bg-green-100 text-green-800' : p.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stockBadgeClass(p.stock)}`}>
                       {p.stock}
                     </span>
                   </td>

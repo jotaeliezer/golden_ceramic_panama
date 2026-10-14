@@ -76,14 +76,14 @@ export default function AdminCustomerDetail() {
 
   return (
     <div>
-      <Link to="/admin/customers" className="text-sm text-gray-500 hover:text-charcoal">
+      <Link to="/admin/customers" className="text-sm text-gray-500 hover:text-charcoal dark:text-neutral-300">
         Back to customers
       </Link>
 
       {loading ? (
         <p className="mt-6">Loading customer...</p>
       ) : error || !customer ? (
-        <p role="alert" className="mt-6 text-red-700">
+        <p role="alert" className="mt-6 text-red-700 dark:text-red-300">
           {error || "Customer not found."}
         </p>
       ) : (
@@ -91,12 +91,12 @@ export default function AdminCustomerDetail() {
           <div className="mt-4 mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="font-serif text-3xl text-charcoal">{display(customer.name)}</h1>
-              <p className="mt-1 break-all text-sm text-gray-600">{customer.email}</p>
+              <p className="mt-1 break-all text-sm text-gray-600 dark:text-neutral-300">{customer.email}</p>
             </div>
             <button
               type="button"
               onClick={() => setCompose(true)}
-              className="inline-flex items-center justify-center gap-2 rounded bg-charcoal px-4 py-2 text-sm font-semibold text-white hover:bg-charcoal-light"
+              className="inline-flex items-center justify-center gap-2 rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-light dark:ring-1 dark:ring-white/40"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               Send email
@@ -104,51 +104,51 @@ export default function AdminCustomerDetail() {
           </div>
 
           {notice && (
-            <p role="status" className="mb-4 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            <p role="status" className="mb-4 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
               {notice}
             </p>
           )}
 
           <dl className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg bg-white p-4 shadow">
-              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">Phone</dt>
-              <dd className="mt-1 text-sm text-gray-900">{display(customer.phone)}</dd>
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Phone</dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-neutral-100">{display(customer.phone)}</dd>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow">
-              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">Orders</dt>
-              <dd className="mt-1 text-sm text-gray-900">{customer.orderCount}</dd>
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Orders</dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-neutral-100">{customer.orderCount}</dd>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow">
-              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">Total spent</dt>
-              <dd className="mt-1 text-sm font-semibold text-gray-900">{money(customer.totalSpent)}</dd>
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Total spent</dt>
+              <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-neutral-100">{money(customer.totalSpent)}</dd>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow">
-              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">Last order</dt>
-              <dd className="mt-1 text-sm text-gray-900">{formatDate(customer.lastOrderAt)}</dd>
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+              <dt className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Last order</dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-neutral-100">{formatDate(customer.lastOrderAt)}</dd>
             </div>
           </dl>
 
-          <section className="mb-8 rounded-lg bg-white p-4 shadow">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-gray-500">Shipping address</h2>
-            <p className="mt-2 whitespace-pre-line text-sm text-gray-800">{display(customer.shippingAddress)}</p>
+          <section className="mb-8 rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Shipping address</h2>
+            <p className="mt-2 whitespace-pre-line text-sm text-gray-800 dark:text-neutral-100">{display(customer.shippingAddress)}</p>
           </section>
 
           <h2 className="mb-4 font-serif text-2xl text-charcoal">Orders</h2>
           {orders.length === 0 ? (
-            <p className="text-gray-500">No orders for this customer.</p>
+            <p className="text-gray-500 dark:text-neutral-300">No orders for this customer.</p>
           ) : (
             <div className="space-y-3">
               {orders.map((order) => (
-                <article key={order.id} className="rounded-lg bg-white p-4 shadow">
+                <article key={order.id} className="rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-mono text-sm break-all text-gray-900">{order.id}</p>
-                    <p className="text-sm font-semibold text-gray-900">{money(order.total_amount)}</p>
+                    <p className="font-mono text-sm break-all text-gray-900 dark:text-neutral-100">{order.id}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-neutral-100">{money(order.total_amount)}</p>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-gray-500 dark:text-neutral-300">
                     {formatDate(order.created_at)} · {STATUS_LABELS[order.status] ?? order.status}
                   </p>
                   {order.items?.length > 0 && (
-                    <ul className="mt-3 space-y-1 text-sm text-gray-700">
+                    <ul className="mt-3 space-y-1 text-sm text-gray-700 dark:text-neutral-200">
                       {order.items.map((item) => (
                         <li key={item.id}>
                           {item.quantity} × {item.product_name || item.product_id} ({money(item.price)})

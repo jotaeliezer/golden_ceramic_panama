@@ -128,7 +128,7 @@ export default function AdminCustomers() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-serif text-3xl text-charcoal">Customers</h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-neutral-300">
             Grouped from orders by email. Name and phone appear when they are stored on the latest shipping address.
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function AdminCustomers() {
           type="button"
           disabled={selectedCustomers.length === 0}
           onClick={() => setCompose(selectedCustomers)}
-          className="inline-flex items-center justify-center gap-2 rounded bg-charcoal px-4 py-2 text-sm font-semibold text-white hover:bg-charcoal-light disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-light disabled:opacity-50 dark:ring-1 dark:ring-white/40"
         >
           <Mail className="h-4 w-4" aria-hidden="true" />
           Send email{selectedCustomers.length > 0 ? ` (${selectedCustomers.length})` : ""}
@@ -144,27 +144,27 @@ export default function AdminCustomers() {
       </div>
 
       {notice && (
-        <p role="status" className="mb-4 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <p role="status" className="mb-4 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
           {notice}
         </p>
       )}
       {error && (
-        <p role="alert" className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">
           {error}
         </p>
       )}
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-        <label className="block flex-1 text-sm font-medium text-gray-700">
+        <label className="block flex-1 text-sm font-medium text-gray-700 dark:text-neutral-200">
           Search
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Email, name, phone, or address"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm shadow-sm focus:border-gold focus:ring-gold"
+            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm shadow-sm focus:border-gold focus:ring-gold dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
           />
         </label>
-        <label className="block text-sm font-medium text-gray-700 md:hidden">
+        <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200 md:hidden">
           Sort
           <select
             value={`${sort}:${dir}`}
@@ -173,7 +173,7 @@ export default function AdminCustomers() {
               setSort(nextSort as SortKey);
               setDir(nextDir === "asc" ? "asc" : "desc");
             }}
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm shadow-sm focus:border-gold focus:ring-gold"
+            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm shadow-sm focus:border-gold focus:ring-gold dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
           >
             {SORT_OPTIONS.flatMap((option) => [
               <option key={`${option.value}:desc`} value={`${option.value}:desc`}>
@@ -190,13 +190,13 @@ export default function AdminCustomers() {
       {loading ? (
         <p>Loading customers...</p>
       ) : customers.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-neutral-300">
           {q.trim() ? "No customers match that search." : "No customers yet. They appear here after an order is placed."}
         </p>
       ) : (
         <>
           <div className="space-y-3 md:hidden">
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-neutral-200">
               <input
                 ref={mobileSelectAllRef}
                 type="checkbox"
@@ -210,7 +210,7 @@ export default function AdminCustomers() {
             {customers.map((customer) => (
               <article
                 key={customer.email}
-                className={`space-y-2 rounded-lg bg-white p-4 shadow ${selected.has(customer.email) ? "ring-2 ring-gold" : ""}`}
+                className={`space-y-2 rounded-lg bg-white p-4 shadow dark:bg-neutral-900 ${selected.has(customer.email) ? "ring-2 ring-gold" : "dark:ring-1 dark:ring-white/10"}`}
               >
                 <div className="flex items-start gap-3">
                   <input
@@ -225,8 +225,8 @@ export default function AdminCustomers() {
                     onClick={() => openCustomer(customer.email)}
                     className="min-w-0 flex-1 text-left"
                   >
-                    <p className="break-all font-medium text-gray-900">{customer.email}</p>
-                    <p className="text-sm text-gray-700">{display(customer.name)}</p>
+                    <p className="break-all font-medium text-gray-900 dark:text-neutral-100">{customer.email}</p>
+                    <p className="text-sm text-gray-700 dark:text-neutral-200">{display(customer.name)}</p>
                   </button>
                   <button
                     type="button"
@@ -239,30 +239,30 @@ export default function AdminCustomers() {
                 </div>
                 <dl className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <dt className="text-xs uppercase tracking-wider text-gray-500">Phone</dt>
+                    <dt className="text-xs uppercase tracking-wider text-gray-500 dark:text-neutral-300">Phone</dt>
                     <dd>{display(customer.phone)}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase tracking-wider text-gray-500">Orders</dt>
+                    <dt className="text-xs uppercase tracking-wider text-gray-500 dark:text-neutral-300">Orders</dt>
                     <dd>{customer.orderCount}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase tracking-wider text-gray-500">Total spent</dt>
+                    <dt className="text-xs uppercase tracking-wider text-gray-500 dark:text-neutral-300">Total spent</dt>
                     <dd>{money(customer.totalSpent)}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase tracking-wider text-gray-500">Last order</dt>
+                    <dt className="text-xs uppercase tracking-wider text-gray-500 dark:text-neutral-300">Last order</dt>
                     <dd>{formatDate(customer.lastOrderAt)}</dd>
                   </div>
                 </dl>
-                <p className="whitespace-pre-line text-sm text-gray-600">{display(customer.shippingAddress)}</p>
+                <p className="whitespace-pre-line text-sm text-gray-600 dark:text-neutral-300">{display(customer.shippingAddress)}</p>
               </article>
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto bg-white shadow sm:rounded-lg md:block">
-            <table className="w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="hidden overflow-x-auto bg-white shadow sm:rounded-lg md:block dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
+            <table className="w-full divide-y divide-gray-200 dark:divide-neutral-700">
+              <thead className="bg-gray-50 dark:bg-neutral-950">
                 <tr>
                   <th className="px-3 py-3 text-left">
                     <input
@@ -280,17 +280,17 @@ export default function AdminCustomers() {
                       ["name", "Name"],
                     ] as const
                   ).map(([key, label]) => (
-                    <th key={key} className="px-3 py-3 text-left text-xs font-medium text-gray-500">
+                    <th key={key} className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300">
                       <button type="button" onClick={() => toggleSort(key)} className="uppercase tracking-wider">
                         {label}
                         {sortMark(key)}
                       </button>
                     </th>
                   ))}
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">
                     Phone
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">
                     Shipping address
                   </th>
                   {(
@@ -300,23 +300,23 @@ export default function AdminCustomers() {
                       ["lastOrderAt", "Last order"],
                     ] as const
                   ).map(([key, label]) => (
-                    <th key={key} className="px-3 py-3 text-left text-xs font-medium text-gray-500">
+                    <th key={key} className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300">
                       <button type="button" onClick={() => toggleSort(key)} className="uppercase tracking-wider">
                         {label}
                         {sortMark(key)}
                       </button>
                     </th>
                   ))}
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-gray-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
                 {customers.map((customer) => (
                   <tr
                     key={customer.email}
-                    className={`cursor-pointer hover:bg-gray-50 ${selected.has(customer.email) ? "bg-gold/10" : ""}`}
+                    className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800 ${selected.has(customer.email) ? "bg-gold/10" : ""}`}
                     onClick={() => openCustomer(customer.email)}
                   >
                     <td className="px-3 py-4 align-top" onClick={(event) => event.stopPropagation()}>
@@ -328,17 +328,17 @@ export default function AdminCustomers() {
                         aria-label={`Select ${customer.email}`}
                       />
                     </td>
-                    <td className="px-3 py-4 align-top text-sm break-all text-gray-900">{customer.email}</td>
-                    <td className="px-3 py-4 align-top text-sm text-gray-900">{display(customer.name)}</td>
-                    <td className="px-3 py-4 align-top text-sm text-gray-700">{display(customer.phone)}</td>
-                    <td className="max-w-xs px-3 py-4 align-top whitespace-pre-line text-sm text-gray-600">
+                    <td className="px-3 py-4 align-top text-sm break-all text-gray-900 dark:text-neutral-100">{customer.email}</td>
+                    <td className="px-3 py-4 align-top text-sm text-gray-900 dark:text-neutral-100">{display(customer.name)}</td>
+                    <td className="px-3 py-4 align-top text-sm text-gray-700 dark:text-neutral-200">{display(customer.phone)}</td>
+                    <td className="max-w-xs px-3 py-4 align-top whitespace-pre-line text-sm text-gray-600 dark:text-neutral-300">
                       {display(customer.shippingAddress)}
                     </td>
-                    <td className="px-3 py-4 align-top text-sm text-gray-900">{customer.orderCount}</td>
-                    <td className="px-3 py-4 align-top text-sm font-semibold text-gray-900">
+                    <td className="px-3 py-4 align-top text-sm text-gray-900 dark:text-neutral-100">{customer.orderCount}</td>
+                    <td className="px-3 py-4 align-top text-sm font-semibold text-gray-900 dark:text-neutral-100">
                       {money(customer.totalSpent)}
                     </td>
-                    <td className="px-3 py-4 align-top text-sm whitespace-nowrap text-gray-500">
+                    <td className="px-3 py-4 align-top text-sm whitespace-nowrap text-gray-500 dark:text-neutral-300">
                       {formatDate(customer.lastOrderAt)}
                     </td>
                     <td className="px-3 py-4 align-top" onClick={(event) => event.stopPropagation()}>

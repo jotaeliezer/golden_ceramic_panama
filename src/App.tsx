@@ -6,6 +6,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./store/CartContext";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { ThemeProvider } from "./theme/ThemeContext";
 
 // Components (we'll implement next)
 import Layout from "./components/Layout";
@@ -29,6 +30,7 @@ import AdminCustomerDetail from "./pages/admin/AdminCustomerDetail";
 export default function App() {
   return (
     <LanguageProvider>
+      <ThemeProvider>
       <CartProvider>
       <Router>
         <Routes>
@@ -54,7 +56,8 @@ export default function App() {
           </Route>
         </Routes>
       </Router>
-    </CartProvider>
+      </CartProvider>
+      </ThemeProvider>
     </LanguageProvider>
   );
 }
