@@ -5,7 +5,8 @@ import bcrypt from "bcryptjs";
 import Stripe from "stripe";
 import { sendAdminEmails } from "./admin-email.js";
 import { getCustomer, listCustomers } from "./customers.js";
-import { markOrderPaidAndLowerStock, markPendingOrderCanceled, sql } from "./db.js";
+import { markOrderPaidAndLowerStock, markPendingOrderCanceled, productsHaveEnglishColumns, sql } from "./db.js";
+import { localizedName } from "./i18n/catalog.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-default-key-golden-ceramic";
 
@@ -55,6 +56,22 @@ function requestOrigin(req: express.Request): string {
 function stripeImages(imageUrl: unknown): string[] {
   if (typeof imageUrl === "string" && /^https?:\/\//i.test(imageUrl)) return [imageUrl];
   return [];
+}
+
+function blankToNull(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+let warnedEnglishColumnsMissing = false;
+
+function warnEnglishColumnsMissing(): void {
+  if (warnedEnglishColumnsMissing) return;
+  warnedEnglishColumnsMissing = true;
+  console.warn(
+    "English product fields were not saved because products.name_en and products.description_en do not exist yet. Apply db/migrations/002_product_english.sql. Spanish fields were saved.",
+  );
 }
 
 /**
@@ -179,9 +196,25 @@ export function createApp(): express.Express {
     });
   };
 
+  // to_jsonb reads name_en / description_en only when those columns exist, so this
+  // query still works if the shop is deployed before migration 002.
   app.get("/api/products", async (_req, res) => {
     try {
-      const products = await sql`SELECT * FROM products ORDER BY created_at DESC`;
+      const products = await sql`
+        SELECT
+          id,
+          name,
+          description,
+          price,
+          "imageUrl",
+          category,
+          stock,
+          created_at,
+          NULLIF(btrim(to_jsonb(products) ->> 'name_en'), '') AS name_en,
+          NULLIF(btrim(to_jsonb(products) ->> 'description_en'), '') AS description_en
+        FROM products
+        ORDER BY created_at DESC
+      `;
       res.json(products);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -190,7 +223,21 @@ export function createApp(): express.Express {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const [product] = await sql`SELECT * FROM products WHERE id = ${req.params.id}`;
+      const [product] = await sql`
+        SELECT
+          id,
+          name,
+          description,
+          price,
+          "imageUrl",
+          category,
+          stock,
+          created_at,
+          NULLIF(btrim(to_jsonb(products) ->> 'name_en'), '') AS name_en,
+          NULLIF(btrim(to_jsonb(products) ->> 'description_en'), '') AS description_en
+        FROM products
+        WHERE id = ${req.params.id}
+      `;
       if (!product) return res.status(404).json({ error: "Product not found" });
       res.json(product);
     } catch (error: any) {
@@ -202,7 +249,20 @@ export function createApp(): express.Express {
     try {
       const [order] = await sql`SELECT status FROM orders WHERE id = ${req.params.id}`;
       if (!order) return res.status(404).json({ error: "Order not found" });
-      res.json({ status: order.status });
+      const items = await sql`
+        SELECT
+          oi.quantity,
+          p.name,
+          p.description,
+          p.category,
+          NULLIF(btrim(to_jsonb(p) ->> 'name_en'), '') AS name_en,
+          NULLIF(btrim(to_jsonb(p) ->> 'description_en'), '') AS description_en
+        FROM order_items oi
+        LEFT JOIN products p ON p.id = oi.product_id
+        WHERE oi.order_id = ${req.params.id}
+        ORDER BY oi.id
+      `;
+      res.json({ status: order.status, items });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -210,6 +270,7 @@ export function createApp(): express.Express {
 
   app.post("/api/checkout", async (req, res) => {
     const { items, customerEmail, shippingAddress } = req.body;
+    const locale = req.body?.locale === "en" ? "en" : "es";
 
     try {
       const { orderId, lineItems } = await sql.begin(async (tx) => {
@@ -219,8 +280,19 @@ export function createApp(): express.Express {
 
         const processedItems = [];
         for (const item of items as any[]) {
-          const [product] = await tx`
-            SELECT name, price, stock, "imageUrl"
+          const [product] = await tx<{
+            name: string;
+            price: number;
+            stock: number;
+            imageUrl: string;
+            name_en: string | null;
+          }[]>`
+            SELECT
+              name,
+              price,
+              stock,
+              "imageUrl",
+              NULLIF(btrim(to_jsonb(products) ->> 'name_en'), '') AS name_en
             FROM products
             WHERE id = ${item.id}
             FOR UPDATE
@@ -235,7 +307,7 @@ export function createApp(): express.Express {
             price_data: {
               currency: "usd",
               product_data: {
-                name: product.name,
+                name: localizedName(locale, product),
                 images: stripeImages(product.imageUrl),
               },
               unit_amount: Math.round(price * 100),
@@ -315,12 +387,32 @@ export function createApp(): express.Express {
 
   app.post("/api/products", authenticateAdmin, async (req, res) => {
     const { name, description, price, imageUrl, category, stock } = req.body;
+    const nameEn = blankToNull(req.body?.name_en);
+    const descriptionEn = blankToNull(req.body?.description_en);
     try {
       const id = "p_" + Date.now();
-      await sql`
-        INSERT INTO products (id, name, description, price, "imageUrl", category, stock)
-        VALUES (${id}, ${name}, ${description}, ${parseFloat(price)}, ${imageUrl}, ${category}, ${parseInt(stock)})
-      `;
+      if (await productsHaveEnglishColumns()) {
+        await sql`
+          INSERT INTO products (id, name, description, name_en, description_en, price, "imageUrl", category, stock)
+          VALUES (
+            ${id},
+            ${name},
+            ${description},
+            ${nameEn},
+            ${descriptionEn},
+            ${parseFloat(price)},
+            ${imageUrl},
+            ${category},
+            ${parseInt(stock)}
+          )
+        `;
+      } else {
+        if (nameEn || descriptionEn) warnEnglishColumnsMissing();
+        await sql`
+          INSERT INTO products (id, name, description, price, "imageUrl", category, stock)
+          VALUES (${id}, ${name}, ${description}, ${parseFloat(price)}, ${imageUrl}, ${category}, ${parseInt(stock)})
+        `;
+      }
       res.json({ id });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -329,17 +421,35 @@ export function createApp(): express.Express {
 
   app.put("/api/products/:id", authenticateAdmin, async (req, res) => {
     const { name, description, price, imageUrl, category, stock } = req.body;
+    const nameEn = blankToNull(req.body?.name_en);
+    const descriptionEn = blankToNull(req.body?.description_en);
     try {
-      await sql`
-        UPDATE products
-        SET name = ${name},
-            description = ${description},
-            price = ${parseFloat(price)},
-            "imageUrl" = ${imageUrl},
-            category = ${category},
-            stock = ${parseInt(stock)}
-        WHERE id = ${req.params.id}
-      `;
+      if (await productsHaveEnglishColumns()) {
+        await sql`
+          UPDATE products
+          SET name = ${name},
+              description = ${description},
+              name_en = ${nameEn},
+              description_en = ${descriptionEn},
+              price = ${parseFloat(price)},
+              "imageUrl" = ${imageUrl},
+              category = ${category},
+              stock = ${parseInt(stock)}
+          WHERE id = ${req.params.id}
+        `;
+      } else {
+        if (nameEn || descriptionEn) warnEnglishColumnsMissing();
+        await sql`
+          UPDATE products
+          SET name = ${name},
+              description = ${description},
+              price = ${parseFloat(price)},
+              "imageUrl" = ${imageUrl},
+              category = ${category},
+              stock = ${parseInt(stock)}
+          WHERE id = ${req.params.id}
+        `;
+      }
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });

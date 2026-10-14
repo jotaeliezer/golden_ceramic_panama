@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { useCart } from "../store/CartContext";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, total } = useCart();
   const { t } = useLanguage();
+  const catalog = useCatalogText();
 
   if (items.length === 0) {
     return (
@@ -28,12 +30,15 @@ export default function Cart() {
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 sm:gap-8 border-b border-charcoal/10 pb-8 items-center">
               <div className="w-32 h-32 bg-ivory-focus flex-shrink-0">
-                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
+                <img src={item.imageUrl} alt={catalog.name(item)} className="w-full h-full object-cover mix-blend-multiply" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal">{item.name}</h3>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1.5">{catalog.category(item.category)}</p>
+                      <h3 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal">{catalog.name(item)}</h3>
+                    </div>
                     <p className="font-serif italic text-charcoal-light bg-ivory-dark px-2 py-1">${(item.price * item.cartQuantity).toFixed(2)}</p>
                   </div>
                   <p className="text-[10px] uppercase tracking-widest text-charcoal/50">${item.price.toFixed(2)} {t("cart.each")}</p>
@@ -43,7 +48,7 @@ export default function Cart() {
                   <div className="flex items-center border border-charcoal/20">
                     <button
                       type="button"
-                      aria-label={t("cart.decrease", { name: item.name })}
+                      aria-label={t("cart.decrease", { name: catalog.name(item) })}
                       onClick={() => updateQuantity(item.id, item.cartQuantity - 1)}
                       className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     >
@@ -52,7 +57,7 @@ export default function Cart() {
                     <span className="w-8 text-center text-[11px] select-none font-medium text-charcoal">{item.cartQuantity}</span>
                     <button
                       type="button"
-                      aria-label={t("cart.increase", { name: item.name })}
+                      aria-label={t("cart.increase", { name: catalog.name(item) })}
                       onClick={() => updateQuantity(item.id, item.cartQuantity + 1)}
                       className="min-h-11 min-w-11 w-11 h-11 flex justify-center items-center hover:bg-charcoal hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     >
@@ -61,7 +66,7 @@ export default function Cart() {
                   </div>
                   <button
                     type="button"
-                    aria-label={t("cart.remove", { name: item.name })}
+                    aria-label={t("cart.remove", { name: catalog.name(item) })}
                     onClick={() => removeFromCart(item.id)}
                     className="min-h-11 min-w-11 inline-flex items-center justify-center text-charcoal/40 hover:text-charcoal transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                   >
