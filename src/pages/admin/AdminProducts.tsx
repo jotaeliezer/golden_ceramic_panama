@@ -80,10 +80,15 @@ export default function AdminProducts() {
     setIsEditing(true);
   };
 
-  if (isEditing) {
-    return (
-      <div className="max-w-2xl bg-white p-8 shadow rounded">
-        <h2 className="text-2xl font-serif mb-6">{currentId ? "Edit Product" : "New Product"}</h2>
+  const productForm = (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-form-title"
+          className="max-h-[90dvh] min-h-0 w-full max-w-2xl overflow-y-auto bg-white p-8 shadow rounded"
+        >
+        <h2 id="product-form-title" className="text-2xl font-serif mb-6">{currentId ? "Edit Product" : "New Product"}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -141,12 +146,13 @@ export default function AdminProducts() {
             <button type="submit" className="px-4 py-2 bg-charcoal text-white rounded hover:bg-charcoal-light">Save Product</button>
           </div>
         </form>
+        </div>
       </div>
-    );
-  }
+  );
 
   return (
     <div>
+      {isEditing && productForm}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h1 className="text-3xl font-serif text-charcoal">Products</h1>
         <button onClick={startNew} className="flex items-center px-4 py-2 bg-charcoal text-white tracking-widest text-sm font-semibold rounded hover:bg-charcoal-light">
