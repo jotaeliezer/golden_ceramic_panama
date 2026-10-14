@@ -1,18 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
+import type { CatalogText } from "../i18n/catalog";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useCart } from "../store/CartContext";
 import { useLanguage } from "../i18n/LanguageContext";
+
+interface ThankYouItem extends CatalogText {
+  quantity: number;
+  category?: string | null;
+}
 
 const POLL_LIMIT = 4;
 const POLL_INTERVAL_MS = 2000;
 
 export default function ThankYou() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const { clearCart } = useCart();
   const [params] = useSearchParams();
   const orderId = params.get("orderId")?.trim() || "";
   const [status, setStatus] = useState<string | null>(null);
+  const [items, setItems] = useState<ThankYouItem[]>([]);
 
   useEffect(() => {
     clearCart();
@@ -30,9 +39,12 @@ export default function ThankYou() {
       try {
         const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/status`);
         if (!res.ok) return;
-        const body = (await res.json()) as { status?: string };
+        const body = (await res.json()) as { status?: string; items?: ThankYouItem[] };
         if (cancelled || typeof body.status !== "string") return;
         setStatus(body.status);
+        if (Array.isArray(body.items)) {
+          setItems(body.items.filter((item) => item && typeof item.name === "string"));
+        }
         if (body.status === "pending" && attempts < POLL_LIMIT) {
           timer = window.setTimeout(poll, POLL_INTERVAL_MS);
         }
@@ -86,6 +98,29 @@ export default function ThankYou() {
             {orderId}
           </span>
         </motion.p>
+      ) : null}
+
+      {items.length > 0 ? (
+        <motion.ul
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          aria-label={t("thanks.items")}
+          className="mt-8 md:mt-10 max-w-md mx-auto space-y-4 text-left"
+        >
+          {items.map((item, index) => (
+            <li key={`${item.name}-${index}`} className="border-b border-charcoal/10 pb-4">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1">{catalog.category(item.category)}</p>
+              <p className="font-serif text-xl text-charcoal">
+                {catalog.name(item)}
+                <span className="ml-2 text-base text-charcoal-light">× {item.quantity}</span>
+              </p>
+              {catalog.description(item) ? (
+                <p className="mt-1 text-sm leading-relaxed text-charcoal-light">{catalog.description(item)}</p>
+              ) : null}
+            </li>
+          ))}
+        </motion.ul>
       ) : null}
 
       {paymentLabel ? (

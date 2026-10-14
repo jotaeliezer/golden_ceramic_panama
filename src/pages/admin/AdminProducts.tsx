@@ -5,6 +5,8 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 const labelClass = "block text-sm font-medium text-gray-700 dark:text-neutral-200";
 const fieldClass =
   "mt-1 w-full rounded border border-gray-300 bg-white p-2 text-gray-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100";
+const hintClass = "mt-1 text-xs text-gray-500 dark:text-neutral-400";
+const optionalClass = "font-normal text-gray-400 dark:text-neutral-400";
 
 function stockBadgeClass(stock: number) {
   if (stock > 10) return "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200";
@@ -17,9 +19,18 @@ export default function AdminProducts() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState({
-    name: "", description: "", price: "", imageUrl: "", category: "", stock: ""
-  });
+  const emptyForm = {
+    name: "",
+    description: "",
+    name_en: "",
+    description_en: "",
+    price: "",
+    imageUrl: "",
+    category: "",
+    stock: "",
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
 
   const fetchProducts = () => {
     fetch('/api/products')
@@ -55,7 +66,9 @@ export default function AdminProducts() {
     setCurrentId(p.id);
     setFormData({
       name: p.name,
-      description: p.description,
+      description: p.description ?? "",
+      name_en: p.name_en ?? "",
+      description_en: p.description_en ?? "",
       price: p.price.toString(),
       imageUrl: p.imageUrl,
       category: p.category,
@@ -75,7 +88,7 @@ export default function AdminProducts() {
 
   const startNew = () => {
     setCurrentId(null);
-    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "", stock: "" });
+    setFormData(emptyForm);
     setIsEditing(true);
   };
 
@@ -87,6 +100,11 @@ export default function AdminProducts() {
           <div>
             <label className={labelClass}>Name</label>
             <input required type="text" className={fieldClass} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+          </div>
+          <div>
+            <label className={labelClass}>English name <span className={optionalClass}>(optional)</span></label>
+            <input type="text" className={fieldClass} value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})} />
+            <p className={hintClass}>Shown when the shop language is English. Leave blank to keep the Spanish name.</p>
           </div>
           <div>
             <label className={labelClass}>Category</label>
@@ -124,6 +142,11 @@ export default function AdminProducts() {
           <div>
             <label className={labelClass}>Description</label>
             <textarea required rows={4} className={fieldClass} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+          </div>
+          <div>
+            <label className={labelClass}>English description <span className={optionalClass}>(optional)</span></label>
+            <textarea rows={4} className={fieldClass} value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} />
+            <p className={hintClass}>Shown when the shop language is English. Leave blank to keep the Spanish description.</p>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={() => setIsEditing(false)} className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800">Cancel</button>
