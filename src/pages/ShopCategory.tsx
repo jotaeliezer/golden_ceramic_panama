@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { Product } from "../types";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 import { moldsInCategory } from "../lib/categories";
 import type { MessageKey } from "../i18n/dictionary";
@@ -16,6 +17,7 @@ function moldCount(
 
 export default function ShopCategory() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const { category: categoryParam = "" } = useParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,8 @@ export default function ShopCategory() {
   }
 
   const molds = moldsInCategory(products, categoryParam);
-  const categoryName = molds[0]?.category?.trim() || categoryParam;
+  const storedCategory = molds[0]?.category?.trim() ?? "";
+  const categoryName = storedCategory ? catalog.category(storedCategory) : categoryParam;
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 md:py-16 w-full">
@@ -91,13 +94,13 @@ export default function ShopCategory() {
                 <div className="aspect-[4/5] bg-ivory-focus overflow-hidden mb-5">
                   <img
                     src={p.imageUrl}
-                    alt={p.name}
+                    alt={catalog.name(p)}
                     className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 </div>
                 <div className="flex flex-col mt-auto">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1.5">{p.category}</p>
-                  <h2 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal mb-1">{p.name}</h2>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-1.5">{catalog.category(p.category)}</p>
+                  <h2 className="font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-charcoal mb-1">{catalog.name(p)}</h2>
                   <p className="text-[10px] font-medium text-charcoal/60">${p.price.toFixed(2)} USD</p>
                 </div>
               </Link>

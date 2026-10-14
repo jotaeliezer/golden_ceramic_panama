@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Product } from "../types";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 import { groupCategories } from "../lib/categories";
 import type { MessageKey } from "../i18n/dictionary";
@@ -15,6 +16,7 @@ function moldCount(
 
 export default function Shop() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,12 +71,12 @@ export default function Shop() {
                 <div className="aspect-[4/5] bg-ivory-focus overflow-hidden mb-5">
                   <img
                     src={category.imageUrl}
-                    alt={category.imageAlt}
+                    alt={catalog.name(category.cover)}
                     className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 </div>
                 <div className="flex flex-col mt-auto">
-                  <h2 className="font-serif text-2xl font-light text-charcoal">{category.name}</h2>
+                  <h2 className="font-serif text-2xl font-light text-charcoal">{catalog.category(category.name)}</h2>
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mt-2">
                     {moldCount(t, category.count)}
                   </p>

@@ -1,9 +1,8 @@
 import "dotenv/config";
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import { closeDatabase, sql } from "../src/db.js";
+import { closeDatabase, applySchemaMigrations } from "../src/db.js";
 
-const file = resolve("db/migrations/001_init.sql");
-await sql.unsafe(readFileSync(file, "utf8"));
-console.log("Applied db/migrations/001_init.sql");
+const files = await applySchemaMigrations();
+for (const name of files) {
+  console.log(`Applied db/migrations/${name}`);
+}
 await closeDatabase();

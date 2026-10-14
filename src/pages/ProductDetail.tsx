@@ -4,11 +4,13 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { Product } from "../types";
 import { useCart } from "../store/CartContext";
+import { useCatalogText } from "../i18n/useCatalogText";
 import { useLanguage } from "../i18n/LanguageContext";
 import { categorySlug } from "../lib/categories";
 
 export default function ProductDetail() {
   const { t } = useLanguage();
+  const catalog = useCatalogText();
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
@@ -40,7 +42,7 @@ export default function ProductDetail() {
         className="inline-flex min-h-11 items-center gap-2 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold border-b border-charcoal/30 pb-1 hover:border-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
       >
         <ArrowLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        {categoryName ? t("product.backToCategory", { category: categoryName }) : t("product.backToShop")}
+        {categoryName ? t("product.backToCategory", { category: catalog.category(categoryName) }) : t("product.backToShop")}
       </Link>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
       <motion.div 
@@ -51,7 +53,7 @@ export default function ProductDetail() {
         <div className="absolute inset-4 border border-ivory opacity-30 pointer-events-none"></div>
         <img 
           src={product.imageUrl} 
-          alt={product.name} 
+          alt={catalog.name(product)} 
           className="w-full aspect-[4/5] object-cover shadow-lg mix-blend-multiply"
         />
       </motion.div>
@@ -61,14 +63,14 @@ export default function ProductDetail() {
         animate={{ opacity: 1, x: 0 }}
         className="flex flex-col justify-center"
       >
-        <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-3">{product.category}</p>
-        <h1 className="font-serif text-4xl lg:text-5xl text-charcoal font-light mb-4">{product.name}</h1>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold mb-3">{catalog.category(product.category)}</p>
+        <h1 className="font-serif text-4xl lg:text-5xl text-charcoal font-light mb-4">{catalog.name(product)}</h1>
         <div className="w-12 h-[1px] bg-gold mb-6"></div>
         
         <p className="text-xl font-serif italic text-charcoal-light mb-8">${product.price.toFixed(2)} USD</p>
         
         <p className="text-sm text-charcoal-light leading-relaxed mb-10 max-w-lg">
-          {product.description}
+          {catalog.description(product)}
         </p>
         
         <div className="flex items-center space-x-4 mb-10">

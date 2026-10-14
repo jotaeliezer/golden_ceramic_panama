@@ -21,7 +21,8 @@ export interface CategoryGroup {
   slug: string;
   count: number;
   imageUrl: string;
-  imageAlt: string;
+  /** Representative mold, so the cover alt follows the shop language. */
+  cover: Pick<Product, "name" | "name_en">;
 }
 
 export function groupCategories(products: Product[]): CategoryGroup[] {
@@ -48,7 +49,7 @@ export function groupCategories(products: Product[]): CategoryGroup[] {
       slug,
       count: bucket.products.length,
       imageUrl: representative.imageUrl,
-      imageAlt: representative.name,
+      cover: { name: representative.name, name_en: representative.name_en },
     });
   }
 
