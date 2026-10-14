@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Outlet, Navigate, NavLink } from "react-router-dom";
-import { Package, ShoppingBag, LogOut, Settings } from "lucide-react";
+import { Package, ShoppingBag, LogOut, Settings, Users } from "lucide-react";
 import { useTheme } from "../../theme/ThemeContext";
 
 function focusableItems(panel: HTMLElement | null) {
@@ -114,6 +114,7 @@ function AdminSettingsMenu({
         }}
       >
         <Settings className={placement === "up" ? "h-5 w-5" : "h-4 w-4"} aria-hidden="true" />
+        {placement === "down" ? <span>Settings</span> : null}
       </button>
       {open && (
         <div
@@ -171,7 +172,7 @@ export default function AdminLayout() {
     }`;
 
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex min-h-11 items-center justify-center gap-1.5 px-2 text-xs font-medium transition-colors ${
+    `flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors ${
       isActive ? "text-gold border-b-2 border-gold" : "text-gray-300 hover:text-white"
     }`;
 
@@ -185,6 +186,10 @@ export default function AdminLayout() {
           <NavLink to="/admin" end className={desktopLinkClass}>
             <ShoppingBag className="w-5 h-5 mr-3" />
             Orders
+          </NavLink>
+          <NavLink to="/admin/customers" className={desktopLinkClass}>
+            <Users className="w-5 h-5 mr-3" />
+            Customers
           </NavLink>
           <NavLink to="/admin/products" className={desktopLinkClass}>
             <Package className="w-5 h-5 mr-3" />
@@ -205,10 +210,14 @@ export default function AdminLayout() {
           <div className="px-4 pt-4 pb-3">
             <h2 className="font-serif text-lg text-gold">Admin Panel</h2>
           </div>
-          <nav aria-label="Admin" className="grid grid-cols-3 border-t border-white/10">
+          <nav aria-label="Admin" className="grid grid-cols-4 border-t border-white/10">
             <NavLink to="/admin" end className={mobileLinkClass}>
               <ShoppingBag className="w-4 h-4" aria-hidden="true" />
               Orders
+            </NavLink>
+            <NavLink to="/admin/customers" className={mobileLinkClass}>
+              <Users className="w-4 h-4" aria-hidden="true" />
+              Customers
             </NavLink>
             <NavLink to="/admin/products" className={mobileLinkClass}>
               <Package className="w-4 h-4" aria-hidden="true" />
@@ -217,7 +226,7 @@ export default function AdminLayout() {
             <AdminSettingsMenu
               panelId="admin-settings-mobile"
               placement="down"
-              buttonClassName="inline-flex min-h-11 w-full items-center justify-center text-gray-300 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              buttonClassName="inline-flex min-h-14 w-full flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium text-gray-300 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             />
           </nav>
         </header>

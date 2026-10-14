@@ -6,6 +6,10 @@
       "destination": "/api?__vcpath=/:path*"
     },
     {
+      "source": "/shop/:category",
+      "destination": "/index.html"
+    },
+    {
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }

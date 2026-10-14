@@ -34,6 +34,16 @@ export interface OrderWithItems extends Order {
   items: OrderItem[];
 }
 
+export interface CustomerSummary {
+  email: string;
+  name: string | null;
+  phone: string | null;
+  shippingAddress: string | null;
+  orderCount: number;
+  totalSpent: number;
+  lastOrderAt: string;
+}
+
 export interface CartItem extends Product {
   cartQuantity: number;
 }
