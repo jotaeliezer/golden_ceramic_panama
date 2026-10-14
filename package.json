@@ -12,7 +12,8 @@
     "start": "tsx server.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",
-    "admin:set-password": "tsx scripts/admin-set-password.ts"
+    "admin:set-password": "tsx scripts/admin-set-password.ts",
+    "test:customers": "tsx scripts/test-admin-customers.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
