@@ -112,6 +112,7 @@ const es = {
   "thanks.kicker": "Pedido recibido",
   "thanks.title": "Gracias por su pedido",
   "thanks.orderLabel": "Número de pedido",
+  "thanks.orderNumber": "Pedido #{number}",
   "thanks.note":
     "Le enviaremos una confirmación en breve. El taller se pondrá en contacto para coordinar la entrega.",
   "thanks.catalog": "Volver al catálogo",
@@ -245,6 +246,7 @@ const en: { [K in MessageKey]: string } = {
   "thanks.kicker": "Order received",
   "thanks.title": "Thank you for your order",
   "thanks.orderLabel": "Order number",
+  "thanks.orderNumber": "Order #{number}",
   "thanks.note":
     "A confirmation will follow shortly. The workshop will be in touch about delivery.",
   "thanks.catalog": "Back to the catalog",
