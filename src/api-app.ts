@@ -7,6 +7,7 @@ import { sendAdminEmails } from "./admin-email.js";
 import { getCustomer, listCustomers } from "./customers.js";
 import { markOrderPaidAndLowerStock, markPendingOrderCanceled, productsHaveEnglishColumns, sql } from "./db.js";
 import { localizedName } from "./i18n/catalog.js";
+import { notifyAdminOfPaidOrder } from "./paid-order-email.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-default-key-golden-ceramic";
 
@@ -150,6 +151,13 @@ export function createApp(): express.Express {
             const result = await markOrderPaidAndLowerStock(orderId);
             if (result === "paid") {
               console.log(`Order ${orderId} marked paid. Stock lowered.`);
+              // Only the pending → paid claim sends mail. A replay is already_paid
+              // and does not send again. Mail errors must not fail the webhook.
+              try {
+                await notifyAdminOfPaidOrder(orderId);
+              } catch {
+                console.warn("Admin payment email failed.");
+              }
             } else if (result === "already_paid") {
               console.log(`Order ${orderId} is already paid. Stock left unchanged.`);
             } else {

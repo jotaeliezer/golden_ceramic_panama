@@ -1,6 +1,6 @@
 import { sql } from "./db.js";
+import { sendResendEmail } from "./resend-email.js";
 
-const RESEND_URL = "https://api.resend.com/emails";
 export const MAX_RECIPIENTS_PER_REQUEST = 50;
 const WINDOW_MS = 60_000;
 const MAX_EMAILS_PER_WINDOW = 50;
@@ -117,22 +117,13 @@ export async function sendAdminEmails(input: {
         const recipient = recipients[cursor];
         cursor += 1;
         try {
-          const response = await doFetch(RESEND_URL, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from,
-              to: [recipient],
-              subject,
-              text: message,
-            }),
-            signal: AbortSignal.timeout(15_000),
+          const result = await sendResendEmail({
+            to: recipient,
+            subject,
+            text: message,
+            fetchImpl: doFetch,
           });
-          await response.text().catch(() => "");
-          if (response.ok) sent += 1;
+          if (result.ok) sent += 1;
           else failed += 1;
         } catch {
           failed += 1;
