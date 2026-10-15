@@ -14,6 +14,13 @@ interface ThankYouItem extends CatalogText {
 const POLL_LIMIT = 4;
 const POLL_INTERVAL_MS = 2000;
 
+/** Display only. The stored id (for example `ord_12345`) is left unchanged. */
+function displayOrderNumber(orderId: string): string {
+  const match = /^ord_(.+)$/i.exec(orderId);
+  const number = match?.[1]?.trim();
+  return number || orderId;
+}
+
 export default function ThankYou() {
   const { t } = useLanguage();
   const catalog = useCatalogText();
@@ -95,7 +102,7 @@ export default function ThankYou() {
         >
           {t("thanks.orderLabel")}
           <span className="mt-3 block font-serif text-2xl sm:text-3xl normal-case tracking-normal text-charcoal break-all">
-            {orderId}
+            {t("thanks.orderNumber", { number: displayOrderNumber(orderId) })}
           </span>
         </motion.p>
       ) : null}
