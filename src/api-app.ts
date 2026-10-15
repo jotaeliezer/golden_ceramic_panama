@@ -5,7 +5,8 @@ import bcrypt from "bcryptjs";
 import Stripe from "stripe";
 import { sendAdminEmails } from "./admin-email.js";
 import { getCustomer, listCustomers } from "./customers.js";
-import { markOrderPaidAndLowerStock, markPendingOrderCanceled, productsHaveEnglishColumns, sql } from "./db.js";
+import { markOrderPaidAndLowerStock, markPendingOrderCanceled, ordersHaveDeliveryAddressColumn, productsHaveEnglishColumns, sql } from "./db.js";
+import { deliveryErrorMessage, formatShippingAddress, parseDeliveryAddress } from "./delivery-address.js";
 import { localizedName } from "./i18n/catalog.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-default-key-golden-ceramic";
@@ -62,6 +63,16 @@ function blankToNull(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+let warnedDeliveryColumnMissing = false;
+
+function warnDeliveryColumnMissing(): void {
+  if (warnedDeliveryColumnMissing) return;
+  warnedDeliveryColumnMissing = true;
+  console.warn(
+    "orders.delivery_address does not exist yet. The readable address was saved in shipping_address. Apply db/migrations/003_order_delivery_address.sql. Do not run that statement against production unless you intend to add the column.",
+  );
 }
 
 let warnedEnglishColumnsMissing = false;
@@ -269,10 +280,23 @@ export function createApp(): express.Express {
   });
 
   app.post("/api/checkout", async (req, res) => {
-    const { items, customerEmail, shippingAddress } = req.body;
+    const { items } = req.body;
     const locale = req.body?.locale === "en" ? "en" : "es";
+    const customerEmail = typeof req.body?.customerEmail === "string" ? req.body.customerEmail.trim() : "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || customerEmail.length > 254) {
+      return res.status(400).json({ error: "A valid email is required." });
+    }
+    const parsedDelivery = parseDeliveryAddress(req.body?.deliveryAddress);
+    if (parsedDelivery.ok === false) {
+      return res.status(400).json({ error: deliveryErrorMessage(parsedDelivery.issues[0]) });
+    }
+    const delivery = parsedDelivery.address;
+    const shippingAddress = formatShippingAddress(delivery);
 
     try {
+      const storeStructuredAddress = await ordersHaveDeliveryAddressColumn();
+      if (!storeStructuredAddress) warnDeliveryColumnMissing();
+
       const { orderId, lineItems } = await sql.begin(async (tx) => {
         let totalAmount = 0;
         const orderId = "ord_" + Date.now();
@@ -319,10 +343,19 @@ export function createApp(): express.Express {
         }
 
         // Orders start pending. Stock is checked above and lowered only after Stripe confirms payment.
-        await tx`
-          INSERT INTO orders (id, customer_email, total_amount, shipping_address, status)
-          VALUES (${orderId}, ${customerEmail}, ${totalAmount}, ${shippingAddress}, ${"pending"})
-        `;
+        // shipping_address stays the readable copy. delivery_address is the structured column,
+        // added only when that column already exists so an unmigrated database still accepts the order.
+        if (storeStructuredAddress) {
+          await tx`
+            INSERT INTO orders (id, customer_email, total_amount, shipping_address, delivery_address, status)
+            VALUES (${orderId}, ${customerEmail}, ${totalAmount}, ${shippingAddress}, ${tx.json(delivery)}, ${"pending"})
+          `;
+        } else {
+          await tx`
+            INSERT INTO orders (id, customer_email, total_amount, shipping_address, status)
+            VALUES (${orderId}, ${customerEmail}, ${totalAmount}, ${shippingAddress}, ${"pending"})
+          `;
+        }
 
         for (let index = 0; index < processedItems.length; index++) {
           const pi = processedItems[index];
@@ -339,6 +372,8 @@ export function createApp(): express.Express {
       try {
         const stripe = getStripe();
         const origin = requestOrigin(req);
+        // Delivery is collected on our form and limited to Panama.
+        // Do not set shipping_address_collection: Stripe would ask for the address again.
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: lineItems,
@@ -347,7 +382,10 @@ export function createApp(): express.Express {
           cancel_url: `${origin}/cart?canceled=true`,
           customer_email: customerEmail,
           client_reference_id: orderId,
-          metadata: { orderId },
+          metadata: {
+            orderId,
+            deliveryCountry: "PA",
+          },
         });
         checkoutUrl = session.url;
       } catch (e: any) {

@@ -18,6 +18,16 @@ export interface Order {
   total_amount: number;
   status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'canceled';
   shipping_address: string;
+  /** Structured Panama address. Missing on older rows, and until the column exists. */
+  delivery_address?: {
+    name: string;
+    street: string;
+    corregimiento: string;
+    city: string;
+    province: string;
+    notes: string | null;
+    country: "Panama";
+  } | null;
   created_at: string;
 }
 
