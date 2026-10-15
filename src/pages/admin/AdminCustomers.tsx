@@ -129,7 +129,7 @@ export default function AdminCustomers() {
         <div>
           <h1 className="font-serif text-3xl text-charcoal">Customers</h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-neutral-300">
-            Grouped from orders by email. Name and phone appear when they are stored on the latest shipping address.
+            Grouped from orders by email. Name and phone appear when they are stored on the latest delivery address. Delivery is only within Panama.
           </p>
         </div>
         <button

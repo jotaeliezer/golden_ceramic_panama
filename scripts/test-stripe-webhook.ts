@@ -30,6 +30,8 @@ const stripe = new Stripe("sk_test_local_webhook_test_key");
 type OrderRow = {
   id: string;
   status: string;
+  shipping_address?: string | null;
+  delivery_address?: { province?: string; country?: string; city?: string } | null;
   items: { product_id: string; quantity: number }[];
 };
 
@@ -163,7 +165,15 @@ async function checkout(productId: string, quantity: number): Promise<{ status: 
     body: JSON.stringify({
       items: [{ id: productId, quantity }],
       customerEmail: "buyer@example.com",
-      shippingAddress: "123 Test Street",
+      deliveryAddress: {
+        name: "Test Buyer",
+        street: "Calle de prueba 123",
+        corregimiento: "Bella Vista",
+        city: "Ciudad de Panamá",
+        province: "Panamá",
+        notes: "Local test landmark",
+        country: "Panama",
+      },
     }),
   });
   const body = (await res.json()) as { orderId?: string; error?: string; success?: boolean };
@@ -261,6 +271,14 @@ async function main(): Promise<void> {
 
     check(placed.status === 200 && !!placed.orderId, `checkout returned 200 and an order id (${placed.orderId ?? placed.error})`);
     check(pending?.status === "pending", `new order status is pending (got ${pending?.status})`);
+    check(
+      pending?.shipping_address?.includes("Calle de prueba 123") === true && pending.shipping_address.includes("Panama"),
+      "readable shipping address is the Panama delivery",
+    );
+    check(
+      pending?.delivery_address?.province === "Panamá" && pending.delivery_address.country === "Panama",
+      "structured delivery address is stored on the order",
+    );
     check(stockAfterCheckout === stockBefore, `stock unchanged after checkout (${stockBefore} -> ${stockAfterCheckout})`);
 
     const unpaidPayload = eventPayload({

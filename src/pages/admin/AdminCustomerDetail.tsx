@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Mail } from "lucide-react";
 import type { CustomerSummary, OrderWithItems } from "../../types";
 import AdminEmailModal from "./AdminEmailModal";
+import { OrderDeliveryAddress } from "./OrderDeliveryAddress";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -129,7 +130,7 @@ export default function AdminCustomerDetail() {
           </dl>
 
           <section className="mb-8 rounded-lg bg-white p-4 shadow dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Shipping address</h2>
+            <h2 className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-300">Delivery address</h2>
             <p className="mt-2 whitespace-pre-line text-sm text-gray-800 dark:text-neutral-100">{display(customer.shippingAddress)}</p>
           </section>
 
@@ -147,6 +148,10 @@ export default function AdminCustomerDetail() {
                   <p className="mt-1 text-sm text-gray-500 dark:text-neutral-300">
                     {formatDate(order.created_at)} · {STATUS_LABELS[order.status] ?? order.status}
                   </p>
+                  <div className="mt-3">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">Delivery</p>
+                    <OrderDeliveryAddress shippingAddress={order.shipping_address} deliveryAddress={order.delivery_address} />
+                  </div>
                   {order.items?.length > 0 && (
                     <ul className="mt-3 space-y-1 text-sm text-gray-700 dark:text-neutral-200">
                       {order.items.map((item) => (

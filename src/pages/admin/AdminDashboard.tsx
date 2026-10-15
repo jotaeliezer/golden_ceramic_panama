@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { OrderWithItems } from "../../types";
+import { OrderDeliveryAddress } from "./OrderDeliveryAddress";
 
 const ORDER_STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
@@ -97,7 +98,10 @@ export default function AdminDashboard() {
             <article key={order.id} className="bg-white shadow rounded-lg p-4 space-y-3 dark:bg-neutral-900 dark:ring-1 dark:ring-white/10">
               <div>
                 <p className="font-mono text-sm text-gray-900 break-all dark:text-neutral-100">{order.id}</p>
-                <p className="text-xs text-gray-500 mt-1 break-words dark:text-neutral-300">{order.shipping_address}</p>
+                <div className="mt-2">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">Delivery</p>
+                  <OrderDeliveryAddress shippingAddress={order.shipping_address} deliveryAddress={order.delivery_address} />
+                </div>
               </div>
               <p className="text-sm text-gray-900 break-all dark:text-neutral-100">{order.customer_email}</p>
               <div className="flex items-center justify-between gap-3 text-sm">
@@ -132,7 +136,10 @@ export default function AdminDashboard() {
                 <tr key={order.id}>
                   <td className="px-3 py-4 sm:px-6 text-sm text-gray-900 align-top dark:text-neutral-100">
                     <div className="font-mono break-all">{order.id}</div>
-                    <div className="text-xs text-gray-500 mt-1 break-words dark:text-neutral-300">{order.shipping_address}</div>
+                    <div className="mt-2">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">Delivery</p>
+                      <OrderDeliveryAddress shippingAddress={order.shipping_address} deliveryAddress={order.delivery_address} />
+                    </div>
                   </td>
                   <td className="px-3 py-4 sm:px-6 text-sm text-gray-900 break-all align-top dark:text-neutral-100">{order.customer_email}</td>
                   <td className="px-3 py-4 sm:px-6 text-sm text-gray-500 align-top dark:text-neutral-300">

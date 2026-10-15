@@ -102,6 +102,27 @@ export async function applySchemaMigrations(): Promise<string[]> {
   return files;
 }
 
+let deliveryAddressColumnReady = false;
+
+/**
+ * True only after orders.delivery_address exists.
+ * A false result is not cached, so a migration applied while the process is up
+ * is picked up on the next checkout. A true result stays true.
+ */
+export async function ordersHaveDeliveryAddressColumn(): Promise<boolean> {
+  if (deliveryAddressColumnReady) return true;
+  const rows = await sql<{ column_name: string }[]>`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'orders'
+      AND column_name = 'delivery_address'
+  `;
+  const ready = rows.length > 0;
+  if (ready) deliveryAddressColumnReady = true;
+  return ready;
+}
+
 let englishColumnsReady = false;
 
 /**

@@ -39,6 +39,22 @@ Replace the placeholder with your own test secret key. Never commit `.env` or a 
 
 On the Stripe-hosted payment page, use test card `4242 4242 4242 4242`, any future expiry date, and any CVC. No real charge is created. Stripe shows its own test-mode badge on that page.
 
+## Delivery
+
+Orders are delivered **only within Panama**. Checkout asks for a name, street or building, corregimiento or district, city, and province (or indigenous comarca). Notes and a landmark are optional. The country is Panama. There is no country picker.
+
+Stripe Checkout is not asked to collect a shipping address. The customer enters the address once, on this site, and then pays on Stripe. The session metadata records `deliveryCountry` as `PA`.
+
+The address is saved with the order. The admin orders list and each order on the customer page show it, so the workshop knows where to deliver. Older orders keep whatever text was already in `shipping_address`.
+
+The live `orders` table needs one new nullable column before the structured address can be stored. Apply this yourself in the Supabase SQL editor. Do not run it against production from CI or from this repository's deploy. `npm run dev` applies `db/migrations/*.sql` only to the database in your local `DATABASE_URL`.
+
+```sql
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address jsonb;
+```
+
+The same statement is in [db/migrations/003_order_delivery_address.sql](db/migrations/003_order_delivery_address.sql). Until that column exists, checkout still saves a readable copy in `shipping_address` and the order goes through.
+
 ## Admin password
 
 The shop does not ship a demo admin password. Passwords are stored as bcrypt hashes. Set one against `DATABASE_URL`:
