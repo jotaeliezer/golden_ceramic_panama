@@ -39,6 +39,28 @@ Replace the placeholder with your own test secret key. Never commit `.env` or a 
 
 On the Stripe-hosted payment page, use test card `4242 4242 4242 4242`, any future expiry date, and any CVC. No real charge is created. Stripe shows its own test-mode badge on that page.
 
+## Admin payment email
+
+When Stripe marks an order paid (`checkout.session.completed` with a paid status), the server emails the shop admin through Resend. The message lists the order number, the customer name, each item (name, quantity, and price), the total, and the delivery address when the order has one.
+
+Set these in `.env` for local work and in the Vercel project environment:
+
+- `RESEND_API_KEY` — Resend API key
+- `EMAIL_FROM` — From address Resend is allowed to send as
+- `ADMIN_NOTIFY_EMAIL` — Inbox that receives the payment notice
+
+Copy the placeholder names from [.env.example](.env.example). Put real values only in `.env` or in Vercel. Do not commit them.
+
+If any of the three is missing, the server logs a warning and does not send. The order is still marked paid and stock is still lowered. If sending fails, the webhook still succeeds. A later delivery of the same payment does not send a second email.
+
+To receive a notice locally, set the three variables, run `npm run dev`, and forward Stripe to the webhook:
+
+```
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+
+Put the `whsec_` signing secret from that command in `STRIPE_WEBHOOK_SECRET`. Then pay with test card `4242 4242 4242 4242`.
+
 ## Admin password
 
 The shop does not ship a demo admin password. Passwords are stored as bcrypt hashes. Set one against `DATABASE_URL`:
